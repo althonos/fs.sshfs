@@ -1,0 +1,32 @@
+sudo: false
+language: python
+cache: pip
+
+python:
+- '2.6'
+- '2.7'
+- '3.2'
+- '3.3'
+- '3.4'
+- '3.5'
+- 'pypy'
+- 'pypy3'
+
+
+addons:
+  ssh_known_hosts:
+  - localhost
+
+matrix:
+  allow_failures:
+  - python: '2.6'
+  - python: 'pypy'
+  - python: 'pypy3'
+
+install:
+- pip install --upgrade setuptools
+- pip install green coverage
+- pip install -r requirements.txt
+
+script:
+- green -rvvk
