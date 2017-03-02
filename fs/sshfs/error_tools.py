@@ -3,12 +3,9 @@ from __future__ import unicode_literals
 
 import errno
 import six
-
+import sys
 
 from .. import errors
-
-
-
 
 
 class _ConvertSSHFSErrors(object):
