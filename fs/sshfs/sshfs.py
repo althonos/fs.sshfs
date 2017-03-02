@@ -13,6 +13,7 @@ from .error_tools import convert_sshfs_errors
 from .. import errors
 from ..base import FS
 from ..info import Info
+from ..enums import ResourceType
 from ..iotools import RawWrapper
 from ..path import basename
 from ..permissions import Permissions
@@ -74,7 +75,6 @@ class SSHFS(FS):
                  timeout=10,
                  port=22):
         """
-
         connect(self, hostname, port=22, username=None, password=None,
                 pkey=None, key_filename=None, timeout=None, allow_agent=True,
                 look_for_keys=True, compress=False, sock=None, gss_auth=False,
@@ -87,43 +87,8 @@ class SSHFS(FS):
         self._client = _client = paramiko.SSHClient()
         _client.load_system_host_keys()
         _client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        _client.connect(host, port, user, passwd, pkey, )
+        _client.connect(host, port, user, passwd, pkey)
         self._sftp = _client.open_sftp()
-
-
-    # @contextlib.contextmanager
-    # def _sanitize(self, *paths):
-    #     self.check()
-    #     paths = [self.validatepath(path) for path in paths]
-    #     with self._lock:
-    #         yield paths[-1] if len(paths) == 1 else paths
-
-    # def getinfo(self, path, namespaces=None):
-    #
-    #     # with self._sanitize(path) as _path:
-    #     #     try:
-    #     #         _stat = self._sftp.stat(_path)
-    #     #     except IOError as io_err:
-    #     #         if io_err.errno == 2:
-    #     #             six.raise_from(errors.ResourceNotFound(_path))
-    #     #         else:
-    #     #             raise
-    #     #
-    #     #
-    #     # raw_info = {
-    #     #     'basic': {
-    #     #         'name': basename(_path),
-    #     #         'is_dir': _stat.S_ISDIR(s.st_mode),
-    #     #     },
-    #     #     'details': {
-    #     #         'accessed': _stat.st_atime,
-    #     #         'modified': _stat.st_mtime,
-    #     #         'created': None,          # FIXME: does Paramiko support ctime ?
-    #     #         'metadata_changed': None  # FIXME: samething
-    #     #         'size': _stat.st_size,
-    #     #         'type': OSFS._get_type_from_stat(_stat),
-    #     #     }
-    #     # }
 
     def getinfo(self, path, namespaces=None):
         self.check()
@@ -152,23 +117,16 @@ class SSHFS(FS):
 
         return Info(info)
 
-
-
     def listdir(self, path):
         self.check()
         _path = self.validatepath(path)
 
-        info = self.getinfo(path)
-        if not info.is_dir:
+        _type = self.gettype(_path)
+        if _type is not ResourceType.directory:
             raise errors.DirectoryExpected(path)
 
         with convert_sshfs_errors('listdir', path):
-            # FIXME: raise DirectoryExpected if path is a dir
-            info = self.getinfo(path)
-
-
             return self._sftp.listdir(_path)
-
 
     def makedir(self, path, permissions=None, recreate=False):
         self.check()
@@ -184,8 +142,8 @@ class SSHFS(FS):
         else:
             if (info.is_dir and not recreate) or info.is_file:
                 six.raise_from(errors.DirectoryExists(path), None)
-        return self.opendir(path)
 
+        return self.opendir(path)
 
     def openbin(self, path, mode='r', buffering=-1, **options):
         """
@@ -212,17 +170,15 @@ class SSHFS(FS):
                     mode=_mode.to_platform_bin(),
                     bufsize=buffering))
 
-
-
     def remove(self, path):
         self.check()
         _path = self.validatepath(path)
 
-        if not self.isfile(path):
-            if not self.exists(path):
-                raise errors.ResourceNotFound(path)
-            else:
-                raise errors.FileExpected(path)
+        # NB: this will raise ResourceNotFound
+        # and as expected by the specifications
+        _type = self.gettype(_path)
+        if _type is ResourceType.directory:
+            raise errors.FileExpected(path)
 
         with convert_sshfs_errors('remove', path):
             with self._lock:
@@ -232,12 +188,10 @@ class SSHFS(FS):
         self.check()
         _path = self.validatepath(path)
 
-        if not self.isdir(path):
-            if not self.exists(path):
-                raise errors.ResourceNotFound(path)
-            else:
-                raise errors.DirectoryExpected(path)
-        elif not self.isempty(path):
+        # NB: this will raise ResourceNotFound
+        # and DirectoryExpected as expected by
+        # the specifications
+        if not self.isempty(path):
             raise errors.DirectoryNotEmpty(path)
 
         with convert_sshfs_errors('removedir', path):
@@ -248,8 +202,6 @@ class SSHFS(FS):
         self.check()
         _path = self.validatepath(path)
 
-        # with convert_sshfs_errors('setinfo', path):
-        #     _path = self._sftp.normalize(_path)
         if not self.exists(path):
             raise errors.ResourceNotFound(path)
 
@@ -267,7 +219,6 @@ class SSHFS(FS):
                             access.get('gid'))
             if 'permissions' in access:
                 self._chmod(path, access['permissions'].mode)
-
 
     def _chmod(self, path, mode):
         self._sftp.chmod(path, mode)

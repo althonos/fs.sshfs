@@ -56,3 +56,15 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         fs.close()
         shutil.rmtree(fs.tempdir)
         del fs
+
+    # TODO: add tests for SSHFS._chown
+    def test_chown(self):
+        pass
+
+    # TODO: add tests for SSHFS._chmod
+    def test_chmod(self):
+        pass
+
+    # TODO: add tests for SSHFS._utime
+    def test_utime(self):
+        pass
