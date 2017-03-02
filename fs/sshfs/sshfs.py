@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import contextlib
 import stat
+import io
 
 import six
 import paramiko
@@ -12,10 +13,45 @@ from .error_tools import convert_sshfs_errors
 from .. import errors
 from ..base import FS
 from ..info import Info
+from ..iotools import RawWrapper
 from ..path import basename
 from ..permissions import Permissions
 from ..osfs import OSFS
 from ..mode import Mode
+
+
+class _SSHFileWrapper(RawWrapper):
+
+    def seek(self, offset, whence=0):
+        if whence > 2:
+            raise ValueError("invalid whence "
+                             "({}, should be 0, 1 or 2)".format(whence))
+        return self._f.seek(offset, whence)
+
+    def read(self, size=-1):
+        size = None if size==-1 else size
+        return self._f.read(size)
+
+    def readline(self, size=-1):
+        size = None if size==-1 else size
+        return self._f.readline(size)
+
+    def truncate(self, size=None):
+        size = size or self._f.tell()   # SFTPFile doesn't support
+        return self._f.truncate(size)   # truncate without argument
+
+    def readlines(self, hint=-1):
+        hint = None if hint==-1 else hint
+        return self._f.readlines(hint)
+
+    def __iter__(self):
+        return iter(self._f)
+
+    def __next__(self):
+        return next(self._f)
+
+    def next(self):
+        return next(self._f)
 
 
 class SSHFS(FS):
@@ -151,7 +187,7 @@ class SSHFS(FS):
         return self.opendir(path)
 
 
-    def openbin(self, path, mode=u'r', buffering=-1):
+    def openbin(self, path, mode='r', buffering=-1, **options):
         """
 
         Buffering follows the paramiko spec, not the fs one
@@ -171,7 +207,10 @@ class SSHFS(FS):
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
             with convert_sshfs_errors('openbin', path):
-                return self._sftp.open(_path, mode=str(mode), bufsize=buffering)
+                return _SSHFileWrapper(self._sftp.open(
+                    _path,
+                    mode=_mode.to_platform_bin(),
+                    bufsize=buffering))
 
 
 

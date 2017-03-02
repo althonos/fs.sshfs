@@ -7,6 +7,7 @@ import unittest
 import tempfile
 import shutil
 
+import six
 import paramiko
 
 import fs.sshfs
@@ -45,6 +46,8 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
     def make_fs(self):
         sshfs = fs.sshfs.SSHFS('localhost', pkey=self.rsa_key)
         tempdir = tempfile.mkdtemp()
+        if six.PY2:
+            tempdir = tempdir.decode('utf-8')
         subfs = sshfs.opendir(tempdir)
         subfs.tempdir = tempdir
         return subfs
