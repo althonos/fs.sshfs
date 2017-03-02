@@ -9,9 +9,9 @@ python:
 - '3.3'
 - '3.4'
 - '3.5'
+- '3.6'
 - 'pypy'
 - 'pypy3'
-
 
 addons:
   ssh_known_hosts:
@@ -20,13 +20,15 @@ addons:
 matrix:
   allow_failures:
   - python: '2.6'
+  - python: '3.2'
   - python: 'pypy'
   - python: 'pypy3'
 
 install:
-- pip install --upgrade setuptools
-- pip install green coverage
-- pip install -r requirements.txt
+- pip install -r requirements-dev.txt
 
 script:
 - green -rvvk
+
+after_script:
+- codecov
