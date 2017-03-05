@@ -29,7 +29,6 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        rsa_key_filename = 'test_key'
         cls.rsa_key = paramiko.RSAKey.generate(bits=2048)#, progress_func=show_progress)
         cls._add_key_to_authorized_keys(cls.rsa_key)
 
@@ -52,7 +51,8 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         subfs.tempdir = tempdir
         return subfs
 
-    def destroy_fs(self, fs):
+    @staticmethod
+    def destroy_fs(fs):
         fs.close()
         shutil.rmtree(fs.tempdir)
         del fs

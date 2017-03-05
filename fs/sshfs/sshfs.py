@@ -2,10 +2,7 @@
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
-import contextlib
 import stat
-import io
-
 import six
 import paramiko
 
