@@ -5,7 +5,7 @@ fs.sshfs
 
 |Travis| |Codecov| |Codacy|
 
-.. |Codacy| image:: https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg
+.. |Codacy| image:: https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg?style=flat-square&maxAge=3600
    :target: https://www.codacy.com/app/althonos/fs-sshfs/dashboard
 
 .. |Travis| image:: https://img.shields.io/travis/althonos/fs.sshfs/master.svg?style=flat-square&maxAge=3600
