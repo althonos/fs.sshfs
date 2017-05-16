@@ -79,7 +79,7 @@ class TestSSHFSOpener(fs.test.FSTestCases, unittest.TestCase):
         return fs.open_fs('ssh://{}:{}@localhost:{}/test'.format(
             os.getenv('FS_SSHFS_USER'),
             os.getenv('FS_SSHFS_PASS'),
-            os.getenv('FS_SSHFS_PORT'),
+            int(os.getenv('FS_SSHFS_PORT', 0)),
         ))
 
     @staticmethod
