@@ -1,13 +1,10 @@
+# coding: utf-8
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from .__metadata__ import *
 from .sshfs import SSHFS
 from ..opener import Opener, registry
-
-__author__ = "Martin Larralde"
-__author_email__ = "martin.larralde@ens-cachan.fr"
-__version__ = "0.1.0"
-__license__ = "LGPLv2.1"
 
 
 @registry.install
@@ -18,8 +15,8 @@ class SSHOpener(Opener):
     def open_fs(fs_url, parse_result, writeable, create, cwd):
         #from .sshfs import SSHFS
         ssh_host, _, dir_path = parse_result.resource.partition('/')
-        ssh_host, _, ftp_port = ssh_host.partition(':')
-        ssh_port = int(ftp_port) if ftp_port.isdigit() else 22
+        ssh_host, _, ssh_port = ssh_host.partition(':')
+        ssh_port = int(ssh_port) if ssh_port.isdigit() else 22
         ssh_fs = SSHFS(
             ssh_host,
             port=ssh_port,
