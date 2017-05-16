@@ -38,7 +38,7 @@ install:
 - pip install -r tests/requirements.txt
 
 script:
-- green -rvvk
+- green -rvvkq
 
 after_script:
 - codecov
