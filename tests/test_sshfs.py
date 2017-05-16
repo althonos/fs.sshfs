@@ -13,6 +13,8 @@ import paramiko
 import fs.sshfs
 import fs.test
 
+from . import utils
+
 
 
 class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
@@ -68,3 +70,19 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
     # TODO: add tests for SSHFS._utime
     def test_utime(self):
         pass
+
+
+@unittest.skipUnless(utils.SSH_SERVICE_REACHABLE, "SSH service not running.")
+class TestSSHFSOpener(fs.test.FSTestCases, unittest.TestCase):
+
+    def make_fs(self):
+        return fs.open_fs('ssh://{}:{}@localhost:{}/test'.format(
+            os.getenv('FS_SSHFS_USER'),
+            os.getenv('FS_SSHFS_PASS'),
+            os.getenv('FS_SSHFS_PORT'),
+        ))
+
+    @staticmethod
+    def destroy_fs(fs):
+        fs.close()
+        del fs
