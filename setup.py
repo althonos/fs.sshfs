@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+
+import setuptools
+import os
+
+with open(os.path.join('fs', 'sshfs', '__metadata__.py')) as f:
+    exec(f.read())
+
+CLASSIFIERS = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Topic :: System :: Filesystems',
+]
+
+with open('README.rst', 'rt') as f:
+    DESCRIPTION = f.read()
+
+with open('requirements.txt') as f:
+    REQUIREMENTS = f.read().splitlines()
+
+with open(os.path.join('tests', 'requirements.txt')) as f:
+    TEST_REQUIREMENTS = [l for l in f if not l.startswith('-r')]
+    TEST_REQUIREMENTS.extend(REQUIREMENTS)
+
+
+setuptools.setup(
+    author=__author__,
+    author_email=__author_email__,
+    classifiers=CLASSIFIERS,
+    description="Pyfilesystem2 implementation for SSH/SFTP using paramiko ",
+    install_requires=REQUIREMENTS,
+    license=__license__,
+    long_description=DESCRIPTION,
+    name='fs.sshfs',
+    packages=setuptools.find_packages(exclude=("tests",)),
+    platforms=['any'],
+    test_suite="tests",
+    tests_require=TEST_REQUIREMENTS,
+    url="https://github.com/althonos/fs.sshfs",
+    version=__version__,
+)
