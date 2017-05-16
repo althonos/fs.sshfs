@@ -3,7 +3,7 @@ language: python
 cache: pip
 
 env:
-- FS_SSHFS_USER="user" FS_SSHFS_PASS="pass" FS_SSHSF_PORT=2222
+- FS_SSHFS_USER="user" FS_SSHFS_PASS="pass" FS_SSHFS_PORT=2222
 
 services:
 - docker
@@ -32,7 +32,7 @@ matrix:
 
 before_install:
 - docker pull atmoz/sftp
-- docker run -p ${FS_SSHFS_PORT}:22 -d atmoz/sftp ${FS_SSHFS_USER}:{FS_SSHFS_PASS}:::test
+- docker run -p ${FS_SSHFS_PORT}:22 -d atmoz/sftp ${FS_SSHFS_USER}:${FS_SSHFS_PASS}:::test
 
 install:
 - pip install -r tests/requirements.txt
