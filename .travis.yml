@@ -25,7 +25,7 @@ matrix:
   - python: 'pypy3'
 
 install:
-- pip install -r requirements-dev.txt
+- pip install -r tests/requirements.txt
 
 script:
 - green -rvvk
