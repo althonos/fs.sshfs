@@ -18,7 +18,7 @@ def is_reachable(hostname, port=22, username=None, password=None):
 
 SSH_SERVICE_REACHABLE = is_reachable(
         'localhost',
-        os.getenv('FS_SSHFS_PORT'),
+        int(os.getenv('FS_SSHFS_PORT', 0)),
         os.getenv('FS_SSHFS_USER'),
         os.getenv('FS_SSHFS_PASS'),
 )
