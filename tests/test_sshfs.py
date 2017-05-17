@@ -82,7 +82,7 @@ class TestSSHFSOpener(fs.test.FSTestCases, unittest.TestCase):
         cls.user = "foo"
         cls.pasw = "pass"
         cls.port = 22
-        cls.docker_client = docker.from_env()
+        cls.docker_client = docker.from_env(version='auto')
         cls.startSFTPserver()
 
     @classmethod
