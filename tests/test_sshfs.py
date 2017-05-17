@@ -3,68 +3,16 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import unittest
+import paramiko
 import docker
+import contextlib
+
 
 import fs.sshfs
 import fs.test
 
 from . import utils
 
-
-# @unittest.skip('OOPS')
-# class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
-#
-#     @staticmethod
-#     def _add_key_to_authorized_keys(key):
-#         with open(os.path.expanduser('~/.ssh/authorized_keys'), 'a') as auth_file:
-#             auth_file.write("{} {}\n".format(key.get_name(), key.get_base64()))
-#
-#     @staticmethod
-#     def _get_authorized_keys():
-#         with open(os.path.expanduser('~/.ssh/authorized_keys'), 'r') as auth_file:
-#             return auth_file.readlines()
-#
-#     @classmethod
-#     def setUpClass(cls):
-#         cls.rsa_key = paramiko.RSAKey.generate(bits=2048)#, progress_func=show_progress)
-#         cls._add_key_to_authorized_keys(cls.rsa_key)
-#
-#     @classmethod
-#     def tearDownClass(cls):
-#         keylines = cls._get_authorized_keys()
-#         keylines = [l for l in keylines if not l.startswith(cls.rsa_key.get_name())]
-#         if keylines: # Write the authorized_keys file without test key
-#             with open(os.path.expanduser('~/.ssh/authorized_keys'), 'w') as auth_file:
-#                 auth_file.writelines(keylines)
-#         else: # Remove the authorized_keys file if there was no other key in it
-#             os.remove(os.path.expanduser('~/.ssh/authorized_keys'))
-#
-#     def make_fs(self):
-#         sshfs = fs.sshfs.SSHFS('localhost', pkey=self.rsa_key)
-#         tempdir = tempfile.mkdtemp()
-#         if six.PY2:
-#             tempdir = tempdir.decode('utf-8')
-#         subfs = sshfs.opendir(tempdir)
-#         subfs.tempdir = tempdir
-#         return subfs
-#
-#     @staticmethod
-#     def destroy_fs(fs):
-#         fs.close()
-#         shutil.rmtree(fs.tempdir)
-#         del fs
-#
-#     # TODO: add tests for SSHFS._chown
-#     def test_chown(self):
-#         pass
-#
-#     # TODO: add tests for SSHFS._chmod
-#     def test_chmod(self):
-#         pass
-#
-#     # TODO: add tests for SSHFS._utime
-#     def test_utime(self):
-#         pass
 
 
 @unittest.skipUnless(utils.CI or utils.DOCKER, "docker service unreachable.")
@@ -104,5 +52,46 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
     def destroy_fs(fs):
         if not fs.isclosed():
             fs.removetree('/')
+            fs.close()
+        del fs
+
+
+
+@unittest.skipUnless(utils.CI or utils.DOCKER, "docker service unreachable.")
+class TestSSHFSWithKey(TestSSHFS, unittest.TestCase):
+
+    @classmethod
+    def makeRSAKey(cls):
+        cls.rsa_key = paramiko.RSAKey.generate(bits=2048)
+
+    @classmethod
+    def addKeyToServer(cls):
+        with contextlib.closing(paramiko.SSHClient()) as client:
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect('localhost', cls.port, cls.user, cls.pasw)
+            with contextlib.closing(client.open_sftp()) as sftp:
+                sftp.mkdir('/home/{}/.ssh'.format(cls.user))
+                with sftp.open('/home/{}/.ssh/authorized_keys'.format(cls.user), 'w') as f:
+                    f.write("{} {}\n".format(
+                        cls.rsa_key.get_name(), cls.rsa_key.get_base64()
+                    ).encode('utf-8'))
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestSSHFSWithKey, cls).setUpClass()
+        cls.makeRSAKey()
+
+    def make_fs(self):
+        self.addKeyToServer()
+        ssh_fs = fs.sshfs.SSHFS('localhost',
+            user=self.user, port=self.port, pkey=self.rsa_key
+        )
+        sub_fs = ssh_fs.opendir('/home/{}'.format(self.user))
+        sub_fs.removetree('/')
+        return sub_fs
+
+    @staticmethod
+    def destroy_fs(fs):
+        if not fs.isclosed():
             fs.close()
         del fs
