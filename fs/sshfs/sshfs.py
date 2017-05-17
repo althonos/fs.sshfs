@@ -84,7 +84,10 @@ class SSHFS(FS):
         self._client = _client = paramiko.SSHClient()
         _client.load_system_host_keys()
         _client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        _client.connect(host, port, user, passwd, pkey)
+        _client.connect(
+            host, port, user, passwd, pkey,
+            look_for_keys=True if pkey is None else False
+        )
         self._sftp = _client.open_sftp()
 
     def getinfo(self, path, namespaces=None):
