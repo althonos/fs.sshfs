@@ -6,8 +6,10 @@ import docker
 import os
 
 try:
-    docker.from_env().info()
+    docker.from_env(version='auto').info()
 except Exception:
     DOCKER=False
 else:
     DOCKER=True
+
+CI = os.getenv('CI', '').lower() == 'true'

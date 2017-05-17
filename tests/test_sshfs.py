@@ -74,14 +74,14 @@ from . import utils
 #         pass
 
 
-#@unittest.skipUnless(utils.DOCKER, "docker service unreachable.")
+@unittest.skipUnless(utils.CI or utils.DOCKER, "docker service unreachable.")
 class TestSSHFSOpener(fs.test.FSTestCases, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         cls.user = "foo"
         cls.pasw = "pass"
-        cls.port = 22
+        cls.port = 2222
         cls.docker_client = docker.from_env(version='auto')
         cls.startSFTPserver()
 
@@ -96,7 +96,6 @@ class TestSSHFSOpener(fs.test.FSTestCases, unittest.TestCase):
             detach=True, ports={'22/tcp': cls.port},
             environment={'USER': cls.user, 'PASSWORD': cls.pasw},
         )
-        time.sleep(1)
 
     @classmethod
     def stopSFTPserver(cls):
