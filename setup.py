@@ -4,7 +4,11 @@ import setuptools
 import os
 
 with open(os.path.join('fs', 'sshfs', '__metadata__.py')) as f:
-    exec(f.read())
+    METADATA = {}
+    for l in f:
+        if not l.startswith('#'):
+            key, value = l.split(' = ')
+            METADATA[key] = value.strip().strip('"')
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -32,12 +36,12 @@ with open(os.path.join('tests', 'requirements.txt')) as f:
 
 
 setuptools.setup(
-    author=__author__,
-    author_email=__author_email__,
+    author=METADATA['__author__'],
+    author_email=METADATA['__author_email__'],
     classifiers=CLASSIFIERS,
     description="Pyfilesystem2 implementation for SSH/SFTP using paramiko ",
     install_requires=REQUIREMENTS,
-    license=__license__,
+    license=METADATA['__license__'],
     long_description=DESCRIPTION,
     name='fs.sshfs',
     packages=['fs', 'fs.sshfs', 'fs.opener'],
@@ -45,5 +49,5 @@ setuptools.setup(
     test_suite="tests",
     tests_require=TEST_REQUIREMENTS,
     url="https://github.com/althonos/fs.sshfs",
-    version=__version__,
+    version=METADATA['__version__'],
 )
