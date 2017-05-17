@@ -3,3 +3,4 @@
 green
 coverage
 codecov
+docker
