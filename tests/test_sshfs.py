@@ -2,14 +2,7 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-import os
 import unittest
-import tempfile
-import shutil
-import time
-
-import six
-import paramiko
 import docker
 
 import fs.sshfs
@@ -75,7 +68,7 @@ from . import utils
 
 
 @unittest.skipUnless(utils.CI or utils.DOCKER, "docker service unreachable.")
-class TestSSHFSOpener(fs.test.FSTestCases, unittest.TestCase):
+class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -107,7 +100,8 @@ class TestSSHFSOpener(fs.test.FSTestCases, unittest.TestCase):
             user=self.user, pasw=self.pasw, port=self.port,
         ))
 
-    def destroy_fs(self, fs):
+    @staticmethod
+    def destroy_fs(fs):
         if not fs.isclosed():
             fs.removetree('/')
             fs.close()
