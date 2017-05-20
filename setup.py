@@ -40,7 +40,7 @@ setuptools.setup(
     license=__license__,
     long_description=DESCRIPTION,
     name='fs.sshfs',
-    packages=setuptools.find_packages(exclude=("tests",)),
+    packages=['fs', 'fs.sshfs', 'fs.opener'],
     platforms=['any'],
     test_suite="tests",
     tests_require=TEST_REQUIREMENTS,
