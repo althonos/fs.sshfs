@@ -29,9 +29,12 @@ matrix:
 
 before_install:
 - docker pull sjourdan/alpine-sshd
+- pip install -r tests/requirements.txt
+- if [ "$TRAVIS_BRANCH" == "feat-namespace" ]; then
+  pip install "https://github.com/althonos/pyfilesystem2/archive/feat-namespace.zip";
+  fi
 
 install:
-- pip install -r tests/requirements.txt
 - pip install .
 
 script:
