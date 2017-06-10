@@ -31,7 +31,7 @@ with open('requirements.txt') as f:
     REQUIREMENTS = f.read().splitlines()
 
 with open(os.path.join('tests', 'requirements.txt')) as f:
-    TEST_REQUIREMENTS = [l for l in f if not l.startswith('-r')]
+    TEST_REQUIREMENTS = [l for l in f if not l.startswith(('-r', 'http'))]
     TEST_REQUIREMENTS.extend(REQUIREMENTS)
 
 
