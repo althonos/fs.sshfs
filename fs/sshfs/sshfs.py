@@ -90,6 +90,10 @@ class SSHFS(FS):
         )
         self._sftp = _client.open_sftp()
 
+    def close(self):
+        self._client.close()
+        super(SSHFS, self).close()
+
     def getinfo(self, path, namespaces=None):
         self.check()
         namespaces = namespaces or ()
