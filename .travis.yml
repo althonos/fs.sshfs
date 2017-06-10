@@ -33,6 +33,9 @@ before_install:
 install:
 - pip install -r tests/requirements.txt
 
+install:
+- pip install .
+
 script:
 - green -rvvkq
 
