@@ -15,6 +15,7 @@ python:
 - '3.6'
 - 'pypy'
 - 'pypy3'
+- 'pypy-5.3.1'
 
 addons:
   ssh_known_hosts:
@@ -26,13 +27,15 @@ matrix:
   - python: '3.2'
   - python: 'pypy'
   - python: 'pypy3'
+  - python: 'pypy-5.3.1'
 
 before_install:
 - docker pull sjourdan/alpine-sshd
 
 install:
 - pip install -r tests/requirements.txt -U
-- pip install .
+# Use Python 3.6 inplace to get coverage data
+- if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then pip install .; fi
 - pip install -U https://github.com/Pyfilesystem/pyfilesystem2/archive/master.zip
 
 script:
