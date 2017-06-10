@@ -2,10 +2,11 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import time
 import unittest
+import contextlib
 import paramiko
 import docker
-import contextlib
 
 
 import fs.sshfs
@@ -14,9 +15,8 @@ import fs.test
 from . import utils
 
 
-
 @unittest.skipUnless(utils.CI or utils.DOCKER, "docker service unreachable.")
-class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
+class TestSSHFS(fs.test.FSTestCases):
 
     @classmethod
     def setUpClass(cls):
@@ -30,6 +30,7 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
     def tearDownClass(cls):
         cls.stopSFTPserver()
 
+
     @classmethod
     def startSFTPserver(cls):
         cls._sftp_container = cls.docker_client.containers.run(
@@ -37,16 +38,12 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
             detach=True, ports={'22/tcp': cls.port},
             environment={'USER': cls.user, 'PASSWORD': cls.pasw},
         )
+        time.sleep(0.5)
 
     @classmethod
     def stopSFTPserver(cls):
         cls._sftp_container.kill()
         cls._sftp_container.remove()
-
-    def make_fs(self):
-        return fs.open_fs('ssh://{user}:{pasw}@localhost:{port}/home/{user}'.format(
-            user=self.user, pasw=self.pasw, port=self.port,
-        ))
 
     @staticmethod
     def destroy_fs(fs):
@@ -56,8 +53,14 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         del fs
 
 
+class TestSSHFSWithPassword(TestSSHFS, unittest.TestCase):
 
-@unittest.skipUnless(utils.CI or utils.DOCKER, "docker service unreachable.")
+    def make_fs(self):
+        return fs.open_fs('ssh://{user}:{pasw}@localhost:{port}/home/{user}'.format(
+            user=self.user, pasw=self.pasw, port=self.port,
+        ))
+
+
 class TestSSHFSWithKey(TestSSHFS, unittest.TestCase):
 
     @classmethod
@@ -89,9 +92,3 @@ class TestSSHFSWithKey(TestSSHFS, unittest.TestCase):
         sub_fs = ssh_fs.opendir('/home/{}'.format(self.user))
         sub_fs.removetree('/')
         return sub_fs
-
-    @staticmethod
-    def destroy_fs(fs):
-        if not fs.isclosed():
-            fs.close()
-        del fs

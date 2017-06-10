@@ -88,6 +88,7 @@ class SSHFS(FS):
             host, port, user, passwd, pkey,
             look_for_keys=True if pkey is None else False
         )
+        self._client.get_transport().set_keepalive(10)
         self._sftp = _client.open_sftp()
 
     def close(self):
