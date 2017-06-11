@@ -6,14 +6,12 @@ services:
 - docker
 
 python:
-- '2.6'
 - '2.7'
 - '3.3'
 - '3.4'
 - '3.5'
 - '3.6'
 - 'pypy'
-- 'pypy3'
 - 'pypy-5.3.1'
 
 addons:
@@ -22,9 +20,7 @@ addons:
 
 matrix:
   allow_failures:
-  - python: '2.6'
   - python: 'pypy'
-  - python: 'pypy3'
   - python: 'pypy-5.3.1'
 
 before_install:
@@ -36,7 +32,7 @@ install:
 - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then pip install .; fi
 
 script:
-- if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then green -vvkq; else green -rvvkq; fi
+- green -rvvkq
 
 after_script:
 - codecov
