@@ -19,6 +19,8 @@ from ..mode import Mode
 
 
 class _SSHFileWrapper(RawWrapper):
+    """A file on a remote SSH server.
+    """
 
     def seek(self, offset, whence=0):
         if whence > 2:
@@ -53,6 +55,27 @@ class _SSHFileWrapper(RawWrapper):
 
 
 class SSHFS(FS):
+    """A SSH filesystem using SFTP.
+
+    :param host: A SSH host, e.g. ``shell.openshells.net``.
+    :type host: str
+    :param user: A username (default is current user username).
+    :type user: str
+    :param passwd: Password for the server, or ``None`` for
+        passwordless / key authentification.
+    :type passwd: str
+    :param port: Port number (default is 22).
+    :type port: int
+    :param keepalive: The number of second after which a keep-alive
+        message will be sent (set to 0 to disable keepalive, default is 10)
+    :type keepalive: int
+    :param compress: If the messages should be transfered or not
+        (default: False).
+    :type compress: bool
+
+    :raises `fs.errors.CreateFailed`: If the server could not be connected to.
+    """
+
 
     _meta = {
         'case_insensitive': False,
@@ -70,14 +93,10 @@ class SSHFS(FS):
                  passwd=None,
                  pkey=None,
                  timeout=10,
-                 port=22):
-        """
-        connect(self, hostname, port=22, username=None, password=None,
-                pkey=None, key_filename=None, timeout=None, allow_agent=True,
-                look_for_keys=True, compress=False, sock=None, gss_auth=False,
-                gss_kex=False, gss_deleg_creds=True, gss_host=None,
-                banner_timeout=None)
-        """
+                 port=22,
+                 keepalive=10,
+                 compress=False,
+                 ):
         super(SSHFS, self).__init__()
 
         # TODO: add more options
@@ -86,9 +105,12 @@ class SSHFS(FS):
         _client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         _client.connect(
             host, port, user, passwd, pkey,
-            look_for_keys=True if pkey is None else False
+            look_for_keys=True if pkey is None else False,
+            compress=compress, timeout=timeout
         )
-        self._client.get_transport().set_keepalive(10)
+
+        if keepalive > 0:
+            self._client.get_transport().set_keepalive(keepalive)
         self._sftp = _client.open_sftp()
 
     def close(self):
@@ -151,12 +173,12 @@ class SSHFS(FS):
         return self.opendir(path)
 
     def openbin(self, path, mode='r', buffering=-1, **options):
-        """
-
-        Buffering follows the paramiko spec, not the fs one
-        (only difference is that buffering=1 means line based buffering,
-        not an actual buffer size of 1.
-        """
+        # """
+        #
+        # Buffering follows the paramiko spec, not the fs one
+        # (only difference is that buffering=1 means line based buffering,
+        # not an actual buffer size of 1.
+        # """
         self.check()
         _path = self.validatepath(path)
         _mode = Mode(mode)
