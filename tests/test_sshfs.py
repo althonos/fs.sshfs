@@ -9,7 +9,8 @@ import paramiko
 import docker
 
 
-import fs.sshfs
+from fs.sshfs import SSHFS
+from fs.wrapfs import WrapFS
 import fs.errors
 import fs.test
 
@@ -50,6 +51,11 @@ class TestSSHFS(fs.test.FSTestCases):
         if not fs.isclosed():
             fs.removetree('/')
             fs.close()
+
+            # Patch fix for Pyfilesystem2 issue #51
+            if isinstance(fs, WrapFS):
+                fs.delegate_fs().close()
+
         del fs
 
 
@@ -57,16 +63,12 @@ class TestSSHFSFail(unittest.TestCase):
 
     def test_unknown_host(self):
         with self.assertRaises(fs.errors.CreateFailed):
-            ssh_fs = fs.sshfs.SSHFS(host="unexisting-hostname")
+            ssh_fs = SSHFS(host="unexisting-hostname")
 
 
     def test_wrong_user(self):
         with self.assertRaises(fs.errors.CreateFailed):
-            ssh_fs = fs.sshfs.SSHFS(host="localhost", user="nonsensicaluser")
-
-
-
-
+            ssh_fs = SSHFS(host="localhost", user="nonsensicaluser")
 
 
 class TestSSHFSWithPassword(TestSSHFS, unittest.TestCase):
@@ -102,7 +104,7 @@ class TestSSHFSWithKey(TestSSHFS, unittest.TestCase):
 
     def make_fs(self):
         self.addKeyToServer()
-        ssh_fs = fs.sshfs.SSHFS('localhost',
+        ssh_fs = SSHFS('localhost',
             user=self.user, port=self.port, pkey=self.rsa_key
         )
         sub_fs = ssh_fs.opendir('/home/{}'.format(self.user))
