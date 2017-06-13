@@ -113,13 +113,12 @@ class SSHFS(FS):
                 client.get_transport().set_keepalive(keepalive)
             self._sftp = client.open_sftp()
 
-        except (paramiko.ssh_exception.SSHException,        # protocol errors
-                socket.gaierror, socket.timeout) as e:      # network errors
+        except (paramiko.ssh_exception.SSHException,            # protocol errors
+                paramiko.ssh_exception.NoValidConnectionsError, # connexion errors
+                socket.gaierror, socket.timeout) as e:          # TCP errors
 
             message = "Unable to create filesystem: {}".format(e)
             six.raise_from(errors.CreateFailed(message), e)
-
-
 
     def close(self):
         self._client.close()

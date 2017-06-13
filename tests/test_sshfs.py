@@ -10,6 +10,7 @@ import docker
 
 
 import fs.sshfs
+import fs.errors
 import fs.test
 
 from . import utils
@@ -29,7 +30,6 @@ class TestSSHFS(fs.test.FSTestCases):
     @classmethod
     def tearDownClass(cls):
         cls.stopSFTPserver()
-
 
     @classmethod
     def startSFTPserver(cls):
@@ -51,6 +51,22 @@ class TestSSHFS(fs.test.FSTestCases):
             fs.removetree('/')
             fs.close()
         del fs
+
+
+class TestSSHFSFail(unittest.TestCase):
+
+    def test_unknown_host(self):
+        with self.assertRaises(fs.errors.CreateFailed):
+            ssh_fs = fs.sshfs.SSHFS(host="unexisting-hostname")
+
+
+    def test_wrong_user(self):
+        with self.assertRaises(fs.errors.CreateFailed):
+            ssh_fs = fs.sshfs.SSHFS(host="localhost", user="nonsensicaluser")
+
+
+
+
 
 
 class TestSSHFSWithPassword(TestSSHFS, unittest.TestCase):
