@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import stat
 import six
+import socket
 import paramiko
 
 from .error_tools import convert_sshfs_errors
@@ -96,19 +97,29 @@ class SSHFS(FS):
                  ):
         super(SSHFS, self).__init__()
 
-        # TODO: add more options
-        self._client = _client = paramiko.SSHClient()
-        _client.load_system_host_keys()
-        _client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        _client.connect(
-            host, port, user, passwd, pkey,
-            look_for_keys=True if pkey is None else False,
-            compress=compress, timeout=timeout
-        )
+        try:
 
-        if keepalive > 0:
-            self._client.get_transport().set_keepalive(keepalive)
-        self._sftp = _client.open_sftp()
+            # TODO: add more options
+            self._client = client = paramiko.SSHClient()
+            client.load_system_host_keys()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect(
+                host, port, user, passwd, pkey,
+                look_for_keys=True if pkey is None else False,
+                compress=compress, timeout=timeout
+            )
+
+            if keepalive > 0:
+                client.get_transport().set_keepalive(keepalive)
+            self._sftp = client.open_sftp()
+
+        except (paramiko.ssh_exception.SSHException,        # protocol errors
+                socket.gaierror, socket.timeout) as e:      # network errors
+
+            message = "Unable to create filesystem: {}".format(e)
+            six.raise_from(errors.CreateFailed(message), e)
+
+
 
     def close(self):
         self._client.close()
