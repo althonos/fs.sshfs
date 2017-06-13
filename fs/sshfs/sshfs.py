@@ -57,21 +57,18 @@ class _SSHFileWrapper(RawWrapper):
 class SSHFS(FS):
     """A SSH filesystem using SFTP.
 
-    :param host: A SSH host, e.g. ``shell.openshells.net``.
-    :type host: str
-    :param user: A username (default is current user username).
-    :type user: str
-    :param passwd: Password for the server, or ``None`` for
+    :param str host: A SSH host, e.g. ``shell.openshells.net``.
+    :param str user: A username (default is current user username).
+    :param str passwd: Password for the server, or ``None`` for
         passwordless / key authentification.
-    :type passwd: str
-    :param port: Port number (default is 22).
-    :type port: int
-    :param keepalive: The number of second after which a keep-alive
+    :param pkey: A private key or a list of private keys to use. If none
+        provided, the SSH Agent will be used to look for keys.
+    :type pkey: str, list[str] or ``paramiko.PKey``
+    :param int port: Port number (default is 22).
+    :param int keepalive: The number of second after which a keep-alive
         message will be sent (set to 0 to disable keepalive, default is 10)
-    :type keepalive: int
-    :param compress: If the messages should be transfered or not
+    :param bool compress: If the messages should be transfered or not
         (default: False).
-    :type compress: bool
 
     :raises `fs.errors.CreateFailed`: If the server could not be connected to.
     """
@@ -173,7 +170,26 @@ class SSHFS(FS):
         return self.opendir(path)
 
     def openbin(self, path, mode='r', buffering=-1, **options):
-        # """
+        """Open a binary file-like object.
+
+        :param str path: A path on the filesystem.
+        :param str mode: Mode to open file (must be a valid non-text
+          mode). Since this method only opens binary files, the `b` in
+          the mode string is implied.
+        :param buffering: Buffering policy (-1 to use default
+          buffering, 0 to disable buffering, 1 to enable line based
+          buffering, or any larger positive integer to indicate buffer size).
+        :type buffering: int
+        :param options: Keyword parameters for any additional
+          information required by the filesystem (if any).
+        :rtype: file object
+
+        :raises fs.errors.FileExpected: If the path is not a file.
+        :raises fs.errors.FileExists: If the file exists, and
+          *exclusive mode* is specified (`x` in the mode).
+        :raises fs.errors.ResourceNotFound: If `path` does not exist.
+
+        """
         #
         # Buffering follows the paramiko spec, not the fs one
         # (only difference is that buffering=1 means line based buffering,
