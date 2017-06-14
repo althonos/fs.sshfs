@@ -33,8 +33,8 @@ Requirements
 .. |License six| image:: https://img.shields.io/pypi/l/BeautifulSoup4.svg?maxAge=300&style=flat-square
    :target: https://choosealicense.com/licenses/mit/
 
-.. |Source six| image:: https://img.shields.io/badge/source-Bitbucket-blue.svg?maxAge=300&style=flat-square
-   :target: https://bitbucket.org/gutworth/six
+.. |Source six| image:: https://img.shields.io/badge/source-GitHub-green.svg?maxAge=300&style=flat-square
+   :target: https://github.com/benjaminp/six
 
 .. |PyPI six| image:: https://img.shields.io/pypi/v/six.svg?maxAge=300&style=flat-square
    :target: https://pypi.python.org/pypi/six
