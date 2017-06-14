@@ -25,6 +25,7 @@ class _ConvertSSHFSErrors(object):
         errno.EINVAL: errors.FileExpected,
         errno.ENOSPC: errors.InsufficientStorage,
         errno.EPERM: errors.PermissionDenied,
+        errno.EACCES: errors.PermissionDenied,
         errno.ENETDOWN: errors.RemoteConnectionError,
         errno.ECONNRESET: errors.RemoteConnectionError,
         errno.ENAMETOOLONG: errors.PathError,

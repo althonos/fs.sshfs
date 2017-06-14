@@ -2,17 +2,18 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import stat
 import time
 import unittest
 import contextlib
 import paramiko
 import docker
 
-
+import fs.test
+import fs.errors
 from fs.sshfs import SSHFS
 from fs.wrapfs import WrapFS
-import fs.errors
-import fs.test
+from fs.permissions import Permissions
 
 from . import utils
 
@@ -58,13 +59,42 @@ class TestSSHFS(fs.test.FSTestCases):
 
         del fs
 
+    def test_chmod(self):
+        self.fs.touch("test.txt")
+
+        # Initial permissions
+        info = self.fs.getinfo("test.txt", ["access"])
+        self.assertEqual(info.permissions.mode, 0o644)
+        st = self.fs.delegate_fs()._sftp.stat("test.txt")
+        self.assertEqual(stat.S_IMODE(st.st_mode), 0o644)
+
+        # Change permissions with SSHFS._chown
+        self.fs.delegate_fs()._chmod("test.txt", 0o744)
+        info = self.fs.getinfo("test.txt", ["access"])
+        self.assertEqual(info.permissions.mode, 0o744)
+        st = self.fs.delegate_fs()._sftp.stat("test.txt")
+        self.assertEqual(stat.S_IMODE(st.st_mode), 0o744)
+
+        # Change permissions with SSHFS.setinfo
+        self.fs.setinfo("test.txt",
+                        {"access": {"permissions": Permissions(mode=0o600)}})
+        info = self.fs.getinfo("test.txt", ["access"])
+        self.assertEqual(info.permissions.mode, 0o600)
+        st = self.fs.delegate_fs()._sftp.stat("test.txt")
+        self.assertEqual(stat.S_IMODE(st.st_mode), 0o600)
+
+        with self.assertRaises(fs.errors.PermissionDenied):
+            self.fs.delegate_fs().setinfo("/", {
+                "access": {"permissions": Permissions(mode=0o777)}
+            })
+
+
 
 class TestSSHFSFail(unittest.TestCase):
 
     def test_unknown_host(self):
         with self.assertRaises(fs.errors.CreateFailed):
             ssh_fs = SSHFS(host="unexisting-hostname")
-
 
     def test_wrong_user(self):
         with self.assertRaises(fs.errors.CreateFailed):
