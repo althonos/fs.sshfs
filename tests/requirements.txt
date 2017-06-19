@@ -1,3 +1,5 @@
+https://github.com/Pyfilesystem/pyfilesystem2/archive/master.zip
+
 -r ../requirements.txt
 
 green
