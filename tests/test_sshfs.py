@@ -12,6 +12,7 @@ import docker
 import fs.test
 import fs.errors
 from fs.sshfs import SSHFS
+from fs.subfs import ClosingSubFS
 from fs.wrapfs import WrapFS
 from fs.permissions import Permissions
 
@@ -33,6 +34,10 @@ class TestSSHFS(fs.test.FSTestCases):
     def tearDownClass(cls):
         cls.stopSFTPserver()
 
+    def setUp(self):
+        super(TestSSHFS, self).setUp()
+        self.fs.removetree("/")
+    
     @classmethod
     def startSFTPserver(cls):
         cls._sftp_container = cls.docker_client.containers.run(
@@ -49,30 +54,24 @@ class TestSSHFS(fs.test.FSTestCases):
 
     @staticmethod
     def destroy_fs(fs):
-        if not fs.isclosed():
-            fs.removetree('/')
-            fs.close()
-
-            # Patch fix for Pyfilesystem2 issue #51
-            if isinstance(fs, WrapFS):
-                fs.delegate_fs().close()
-
+        fs.close()
         del fs
 
     def test_chmod(self):
         self.fs.touch("test.txt")
+        remote_path = "/home/{}/test/test.txt".format(self.user)
 
         # Initial permissions
         info = self.fs.getinfo("test.txt", ["access"])
         self.assertEqual(info.permissions.mode, 0o644)
-        st = self.fs.delegate_fs()._sftp.stat("test.txt")
+        st = self.fs.delegate_fs()._sftp.stat(remote_path)
         self.assertEqual(stat.S_IMODE(st.st_mode), 0o644)
 
         # Change permissions with SSHFS._chown
-        self.fs.delegate_fs()._chmod("test.txt", 0o744)
+        self.fs.delegate_fs()._chmod(remote_path, 0o744)
         info = self.fs.getinfo("test.txt", ["access"])
         self.assertEqual(info.permissions.mode, 0o744)
-        st = self.fs.delegate_fs()._sftp.stat("test.txt")
+        st = self.fs.delegate_fs()._sftp.stat(remote_path)
         self.assertEqual(stat.S_IMODE(st.st_mode), 0o744)
 
         # Change permissions with SSHFS.setinfo
@@ -80,14 +79,13 @@ class TestSSHFS(fs.test.FSTestCases):
                         {"access": {"permissions": Permissions(mode=0o600)}})
         info = self.fs.getinfo("test.txt", ["access"])
         self.assertEqual(info.permissions.mode, 0o600)
-        st = self.fs.delegate_fs()._sftp.stat("test.txt")
+        st = self.fs.delegate_fs()._sftp.stat(remote_path)
         self.assertEqual(stat.S_IMODE(st.st_mode), 0o600)
 
         with self.assertRaises(fs.errors.PermissionDenied):
             self.fs.delegate_fs().setinfo("/", {
                 "access": {"permissions": Permissions(mode=0o777)}
             })
-
 
 
 class TestSSHFSFail(unittest.TestCase):
@@ -104,9 +102,11 @@ class TestSSHFSFail(unittest.TestCase):
 class TestSSHFSWithPassword(TestSSHFS, unittest.TestCase):
 
     def make_fs(self):
-        return fs.open_fs('ssh://{user}:{pasw}@localhost:{port}/home/{user}'.format(
+        ssh_fs = fs.open_fs('ssh://{user}:{pasw}@localhost:{port}'.format(
             user=self.user, pasw=self.pasw, port=self.port,
         ))
+        ssh_fs.makedir('/home/{}/test'.format(self.user), recreate=True)
+        return ssh_fs.opendir('/home/{}/test'.format(self.user), factory=ClosingSubFS)
 
 
 class TestSSHFSWithKey(TestSSHFS, unittest.TestCase):
@@ -131,12 +131,11 @@ class TestSSHFSWithKey(TestSSHFS, unittest.TestCase):
     def setUpClass(cls):
         super(TestSSHFSWithKey, cls).setUpClass()
         cls.makeRSAKey()
+        cls.addKeyToServer()
 
     def make_fs(self):
-        self.addKeyToServer()
         ssh_fs = SSHFS('localhost',
             user=self.user, port=self.port, pkey=self.rsa_key
         )
-        sub_fs = ssh_fs.opendir('/home/{}'.format(self.user))
-        sub_fs.removetree('/')
-        return sub_fs
+        ssh_fs.makedir('/home/{}/test'.format(self.user), recreate=True)
+        return ssh_fs.opendir('/home/{}/test'.format(self.user), factory=ClosingSubFS)
