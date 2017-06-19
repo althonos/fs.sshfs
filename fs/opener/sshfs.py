@@ -1,6 +1,6 @@
 from ._base import Opener
 from ._registry import registry
-
+from ..subfs import ClosingSubFS
 
 @registry.install
 class SSHOpener(Opener):
@@ -18,4 +18,8 @@ class SSHOpener(Opener):
             user=parse_result.username,
             passwd=parse_result.password,
         )
-        return ssh_fs.opendir(dir_path) if dir_path else ssh_fs
+        
+        if dir_path:
+            return ssh_fs.opendir(dir_path, factory=ClosingSubFS)
+        else:
+            return ssh_fs
