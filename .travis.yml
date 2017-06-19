@@ -30,6 +30,7 @@ before_install:
 install:
 # Use Python 3.6 inplace to get coverage data
 - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then pip install .; fi
+- pip install -U https://github.com/Pyfilesystem/pyfilesystem2/archive/master.zip
 
 script:
 - green -rvvkq

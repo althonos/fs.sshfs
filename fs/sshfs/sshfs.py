@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import io
 import six
 import stat
+import time
 import socket
 import paramiko
 
@@ -274,12 +275,14 @@ class SSHFS(FS):
     def _chown(self, path, uid, gid):
         if uid is None or gid is None:
             info = self.getinfo(path, namespaces=('access',))
-            uid = uid or info.get('access', {}).get('uid')
-            gid = gid or info.get('access', {}).get('gid')
-        if uid and gid:
-            self._sftp.chown(path, uid, git)
+            uid = uid or info.get('access', 'uid')
+            gid = gid or info.get('access', 'gid')
+        self._sftp.chown(path, uid, gid)
 
     def _utime(self, path, modified, accessed):
-        accessed = int(accessed or modified)
-        modified = int(modified or accessed)
-        self._sftp.utime(path, (accessed, modified))
+        if accessed is not None or modified is not None:
+            accessed = int(modified if accessed is None else accessed)
+            modified = int(accessed if modified is None else modified)
+            self._sftp.utime(path, (accessed, modified))
+        else:
+            self._sftp.utime(path, None)

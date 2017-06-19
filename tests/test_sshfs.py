@@ -11,7 +11,7 @@ import docker
 
 import fs.test
 import fs.errors
-from fs.sshfs import SSHFS
+import fs.sshfs
 from fs.subfs import ClosingSubFS
 from fs.wrapfs import WrapFS
 from fs.permissions import Permissions
@@ -37,7 +37,7 @@ class TestSSHFS(fs.test.FSTestCases):
     def setUp(self):
         super(TestSSHFS, self).setUp()
         self.fs.removetree("/")
-    
+
     @classmethod
     def startSFTPserver(cls):
         cls._sftp_container = cls.docker_client.containers.run(
@@ -87,16 +87,65 @@ class TestSSHFS(fs.test.FSTestCases):
                 "access": {"permissions": Permissions(mode=0o777)}
             })
 
+    def test_chown(self):
+
+        self.fs.touch("test.txt")
+        remote_path = "/home/{}/test/test.txt".format(self.user)
+        info = self.fs.getinfo("test.txt", namespaces=["access"])
+        gid, uid = info.get('access', 'uid'), info.get('access', 'gid')
+
+        with utils.mock.patch.object(self.fs.delegate_fs()._sftp, 'chown') as chown:
+            self.fs.setinfo("test.txt", {'access': {'uid': None}})
+            chown.assert_called_with(remote_path, uid, gid)
+
+            self.fs.setinfo("test.txt", {'access': {'gid': None}})
+            chown.assert_called_with(remote_path, uid, gid)
+
+            self.fs.setinfo("test.txt", {'access': {'gid': 8000}})
+            chown.assert_called_with(remote_path, uid, 8000)
+
+            self.fs.setinfo("test.txt", {'access': {'uid': 1001, 'gid':1002}})
+            chown.assert_called_with(remote_path, 1001, 1002)
+
+    def test_utime(self):
+
+        def get_accessed(f):
+            return f.getdetails("test.txt").get('details', 'accessed')
+        def get_modified(f):
+            return f.getdetails("test.txt").get('details', 'modified')
+
+        self.fs.touch("test.txt")
+        remote_path = "/home/{}/test/test.txt".format(self.user)
+        info = self.fs.getinfo("test.txt", namespaces=["details"])
+
+
+        self.fs.setinfo("test.txt", {'details': {'accessed': None, 'modified': None}})
+        self.assertLessEqual(time.time()-get_accessed(self.fs), 1)
+        self.assertLessEqual(time.time()-get_modified(self.fs), 1)
+
+        self.fs.setinfo("test.txt", {'details': {'accessed': 0}})
+        self.assertEqual(get_accessed(self.fs), 0)
+        self.assertEqual(get_modified(self.fs), 0)
+
+        self.fs.setinfo("test.txt", {'details': {'modified': 100}})
+        self.assertEqual(get_accessed(self.fs), 100)
+        self.assertEqual(get_modified(self.fs), 100)
+
+        self.fs.setinfo("test.txt", {'details': {'modified': 100, 'accessed': 200}})
+        self.assertEqual(get_accessed(self.fs), 200)
+        self.assertEqual(get_modified(self.fs), 100)
+
+
 
 class TestSSHFSFail(unittest.TestCase):
 
     def test_unknown_host(self):
         with self.assertRaises(fs.errors.CreateFailed):
-            ssh_fs = SSHFS(host="unexisting-hostname")
+            ssh_fs = fs.sshfs.SSHFS(host="unexisting-hostname")
 
     def test_wrong_user(self):
         with self.assertRaises(fs.errors.CreateFailed):
-            ssh_fs = SSHFS(host="localhost", user="nonsensicaluser")
+            ssh_fs = fs.sshfs.SSHFS(host="localhost", user="nonsensicaluser")
 
 
 class TestSSHFSWithPassword(TestSSHFS, unittest.TestCase):
@@ -134,7 +183,7 @@ class TestSSHFSWithKey(TestSSHFS, unittest.TestCase):
         cls.addKeyToServer()
 
     def make_fs(self):
-        ssh_fs = SSHFS('localhost',
+        ssh_fs = fs.sshfs.SSHFS('localhost',
             user=self.user, port=self.port, pkey=self.rsa_key
         )
         ssh_fs.makedir('/home/{}/test'.format(self.user), recreate=True)

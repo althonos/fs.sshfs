@@ -18,8 +18,8 @@ class SSHOpener(Opener):
             user=parse_result.username,
             passwd=parse_result.password,
         )
-        
-        if dir_path:
+
+        if dir_path: # pragma: no cover
             return ssh_fs.opendir(dir_path, factory=ClosingSubFS)
         else:
             return ssh_fs

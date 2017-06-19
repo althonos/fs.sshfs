@@ -12,4 +12,9 @@ except Exception:
 else:
     DOCKER=True
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 CI = os.getenv('CI', '').lower() == 'true'
