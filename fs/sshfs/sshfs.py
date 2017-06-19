@@ -2,8 +2,9 @@
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
-import stat
+import io
 import six
+import stat
 import socket
 import paramiko
 
@@ -45,14 +46,8 @@ class _SSHFileWrapper(RawWrapper):
         hint = None if hint==-1 else hint
         return self._f.readlines(hint)
 
-    def __iter__(self):
-        return iter(self._f)
-
-    def __next__(self):
-        return next(self._f)
-
-    def next(self):
-        return next(self._f)
+    def fileno(self):
+        raise io.UnsupportedOperation('fileno')
 
 
 class SSHFS(FS):
