@@ -13,7 +13,6 @@ import fs.test
 import fs.errors
 import fs.sshfs
 from fs.subfs import ClosingSubFS
-from fs.wrapfs import WrapFS
 from fs.permissions import Permissions
 
 from . import utils
@@ -115,9 +114,6 @@ class TestSSHFS(fs.test.FSTestCases):
             return f.getdetails("test.txt").get('details', 'modified')
 
         self.fs.touch("test.txt")
-        remote_path = "/home/{}/test/test.txt".format(self.user)
-        info = self.fs.getinfo("test.txt", namespaces=["details"])
-
 
         self.fs.setinfo("test.txt", {'details': {'accessed': None, 'modified': None}})
         self.assertLessEqual(time.time()-get_accessed(self.fs), 1)
@@ -141,11 +137,11 @@ class TestSSHFSFail(unittest.TestCase):
 
     def test_unknown_host(self):
         with self.assertRaises(fs.errors.CreateFailed):
-            ssh_fs = fs.sshfs.SSHFS(host="unexisting-hostname")
+            _ = fs.sshfs.SSHFS(host="unexisting-hostname")
 
     def test_wrong_user(self):
         with self.assertRaises(fs.errors.CreateFailed):
-            ssh_fs = fs.sshfs.SSHFS(host="localhost", user="nonsensicaluser")
+            _ = fs.sshfs.SSHFS(host="localhost", user="nonsensicaluser")
 
 
 class TestSSHFSWithPassword(TestSSHFS, unittest.TestCase):

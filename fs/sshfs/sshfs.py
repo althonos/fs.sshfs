@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import io
 import six
 import stat
-import time
 import socket
 import paramiko
 
@@ -47,7 +46,8 @@ class _SSHFileWrapper(RawWrapper):
         hint = None if hint==-1 else hint
         return self._f.readlines(hint)
 
-    def fileno(self):
+    @staticmethod
+    def fileno():
         raise io.UnsupportedOperation('fileno')
 
 
