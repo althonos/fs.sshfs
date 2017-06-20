@@ -11,7 +11,7 @@ with open(os.path.join('fs', 'sshfs', '__metadata__.py')) as f:
             METADATA[key] = value.strip().strip('"')
 
 CLASSIFIERS = [
-    'Development Status :: 5 - Production/Stable',
+    'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',

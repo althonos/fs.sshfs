@@ -57,7 +57,8 @@ class SSHFS(FS):
     :param str host: A SSH host, e.g. ``shell.openshells.net``.
     :param str user: A username (default is current user username).
     :param str passwd: Password for the server, or ``None`` for
-        passwordless / key authentification.
+        passwordless / key authentification. If given, it will be
+        immediately discared after establishing the connection.
     :param pkey: A private key or a list of private keys to use. If none
         provided, the SSH Agent will be used to look for keys.
     :type pkey: str, list[str] or ``paramiko.PKey``
@@ -96,6 +97,9 @@ class SSHFS(FS):
         try:
 
             # TODO: add more options
+            self._user = user
+            self._host = host
+            self._port = port
             self._client = client = paramiko.SSHClient()
             client.load_system_host_keys()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -146,6 +150,11 @@ class SSHFS(FS):
             info['access'] = OSFS._make_access_from_stat(_stat)
 
         return Info(info)
+
+    def getsyspath(self, path):
+        _path = self.validatepath(path)
+        return "ssh://{}@{}:{}{}".format(
+            self._user, self._host, self._port, _path)
 
     def listdir(self, path):
         self.check()
