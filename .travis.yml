@@ -11,8 +11,8 @@ python:
 - '3.4'
 - '3.5'
 - '3.6'
-- 'pypy'
-- 'pypy-5.3.1'
+- pypy
+- pypy-5.3.1
 
 addons:
   ssh_known_hosts:
@@ -20,15 +20,14 @@ addons:
 
 matrix:
   allow_failures:
-  - python: 'pypy'
-  - python: 'pypy-5.3.1'
+  - python: pypy
+  - python: pypy-5.3.1
 
 before_install:
 - docker pull sjourdan/alpine-sshd
 - pip install -r tests/requirements.txt -U
 
 install:
-# Use Python 3.6 inplace to get coverage data
 - if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then pip install .; fi
 - pip install -U https://github.com/Pyfilesystem/pyfilesystem2/archive/master.zip
 
@@ -37,6 +36,15 @@ script:
 
 after_script:
 - codecov
+
+deploy:
+  provider: pypi
+  user: althonos
+  password:
+    secure: fSanAO2+HemJdn4qR6AueAo2adjpK5l0/hLzMbeIheV0FQARC3G/N1GX83uTN1vDOFmxZFSo0vH/4P+6HnpZK2OzL1njDC/qWzyoiubEoWO4/PxRBTxySc+iZ96bzEwMN6SC57fHPuTBsUN92NNtqR1bRHTuNeQtZ1HxilMB8uY6t9rZ9zlJikH0sc7kT/yKaHjTrM1IH+9kpi8MTR04QilZ+0s+Ze3rQSqXMJQGff2TnjFRFQLAefpA4gONp0F8vzLSUxJT5JWS+KlapvIchHjm26C5xdEu3giIfmtoWxg3wOwk1OrAauxbx/mi9RhVjSPO7lqC8pJJI3sxZTkSvB/zn3I80O2jc77KyCcECWeq8L2xRdoI3vgXU7pRvO4SRpaPhs4e65Gdm/4VEvXDBCCeZfPADGt+AroAnpA3P6KEn3LGzV6L1JSKiURW54AaDUt0L3JxO263HxKZouU+rzyjGik5+CFmUVzpje7s0hU6SmeWLfcrzjyrJ5AEvZ7DL/8oNdm3NH7V5++avN+qgs7hiCsSnd8dDz5VH1vSuHCvarZqJnJKE4mWb1uVo56ygnxsDecFbI/WIfTVsimRLYGDHACanS5A9dW7e3LYc/vnfrft7njyODsscV8AZSFYjoQWpmOqWN4Y16SjbaNl4Jnmv0XmAQOKJXgZWzez1Bs=
+  on:
+    tags: true
+  distributions: sdist bdist_wheel
 
 notifications:
   email:
