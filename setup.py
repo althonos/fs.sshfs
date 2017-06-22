@@ -31,7 +31,10 @@ with open('requirements.txt') as f:
     REQUIREMENTS = f.read().splitlines()
 
 with open(os.path.join('tests', 'requirements.txt')) as f:
-    TEST_REQUIREMENTS = [l for l in f if not l.startswith(('-r', 'http'))]
+    TEST_REQUIREMENTS = [
+        l for l in f.read().splitlines()
+            if l and not l.startswith(('-r', 'http'))
+    ]
     TEST_REQUIREMENTS.extend(REQUIREMENTS)
 
 
@@ -40,6 +43,7 @@ setuptools.setup(
     author_email=METADATA['__author_email__'],
     classifiers=CLASSIFIERS,
     description="Pyfilesystem2 implementation for SSH/SFTP using paramiko ",
+    include_package_data=True,
     install_requires=REQUIREMENTS,
     license=METADATA['__license__'],
     long_description=DESCRIPTION,
