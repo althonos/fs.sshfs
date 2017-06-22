@@ -38,13 +38,16 @@ after_script:
 - codecov
 
 deploy:
-  provider: pypi
+- provider: pypi
   user: althonos
   password:
-    secure: fSanAO2+HemJdn4qR6AueAo2adjpK5l0/hLzMbeIheV0FQARC3G/N1GX83uTN1vDOFmxZFSo0vH/4P+6HnpZK2OzL1njDC/qWzyoiubEoWO4/PxRBTxySc+iZ96bzEwMN6SC57fHPuTBsUN92NNtqR1bRHTuNeQtZ1HxilMB8uY6t9rZ9zlJikH0sc7kT/yKaHjTrM1IH+9kpi8MTR04QilZ+0s+Ze3rQSqXMJQGff2TnjFRFQLAefpA4gONp0F8vzLSUxJT5JWS+KlapvIchHjm26C5xdEu3giIfmtoWxg3wOwk1OrAauxbx/mi9RhVjSPO7lqC8pJJI3sxZTkSvB/zn3I80O2jc77KyCcECWeq8L2xRdoI3vgXU7pRvO4SRpaPhs4e65Gdm/4VEvXDBCCeZfPADGt+AroAnpA3P6KEn3LGzV6L1JSKiURW54AaDUt0L3JxO263HxKZouU+rzyjGik5+CFmUVzpje7s0hU6SmeWLfcrzjyrJ5AEvZ7DL/8oNdm3NH7V5++avN+qgs7hiCsSnd8dDz5VH1vSuHCvarZqJnJKE4mWb1uVo56ygnxsDecFbI/WIfTVsimRLYGDHACanS5A9dW7e3LYc/vnfrft7njyODsscV8AZSFYjoQWpmOqWN4Y16SjbaNl4Jnmv0XmAQOKJXgZWzez1Bs=
+    secure: q82KcRQ+Zm0MuZApN9ac1gT0kI7MrIwurcf1Vo82dk+GcMw7l6BSoWWNir106YfT9SEy4/BsstuMBr3qrIWfS2Tgja8FT2va9mU1gmROwhVgb6A94VadP9HsxaDX1vOlJt28Q0KLKndJlk4je563Pd7iij8R1LKyZVOkHiphCvG4czlV/dKMT6vluF3Wc4Py7rJld8Q00CHx5apsDjbxM48NYNIvMtgz1kZ3EAWbHQOLpIHCGFrmSnr/2sm0vKxomYt+RLWXuMuxGQEaRMXKvAefWGJNKR5R8jJlYcPBi5Zgf8YDnBoQrjYcij8rjXxYdU/weEywCS3Q6wIFrH/bA3WheyztGre24B6m4nfOiqhXhfHFu7zBC6CfXZcWLqOX0UKIfL/+CYDN+n9ziXC5GDz7oxxZTch2pQwOM5iDJKfcW6995U5fhyccOB9FJq5iJexE2AG3eeA39IQLZHyGQl3x9hyO3DyCBHuCzs6jrY0q//vFGHlXDKff7VGB4XvRGME/8XixTRCJozMVqpDVyzdxf7v5hEsmHCRkMtgCsiHCebjAPh9rAF5I5NetcT4UERv84o09Q+/gDpkHdxt+3UlbvMAV6bMFV8rVqxopH8dFuI2AJKW4f2I2X4qN8J/fIdhc3T8q8V9L/+dTHTbI+Jph5NoWbSo8c0vxysWdxuQ=
   on:
     tags: true
+    python: '3.6'
+    repo: althonos/pronto
   distributions: sdist bdist_wheel
+  server: https://upload.pypi.org/legacy/
 
 notifications:
   email:
