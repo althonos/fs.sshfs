@@ -52,15 +52,16 @@ class _SSHFileWrapper(RawWrapper):
         raise io.UnsupportedOperation('fileno')
 
 
-class _SSHServerPlatform(enum.IntFlag):
-    Windows = enum.auto()
-    Linux = enum.auto()
-    BSD = enum.auto()
-    Darwin = enum.auto()
+class _SSHServerPlatform(enum.Enum):
+    _Unknow = 0
+    Windows = 1
 
-    Unix = Linux | BSD | Darwin
+    Linux = 10
+    BSD = 11
+    Darwin = 12
 
-    _Unknown = enum.auto()
+    Unix = (Linux, BSD, Darwin)
+
 
 
 
