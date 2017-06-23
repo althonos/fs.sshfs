@@ -32,7 +32,7 @@ install:
 - pip install -U https://github.com/Pyfilesystem/pyfilesystem2/archive/master.zip
 
 script:
-- green -rvvkq
+- green
 
 after_script:
 - codecov
