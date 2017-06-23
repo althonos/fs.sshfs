@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import io
 import six
 import stat
+import enum
 import socket
 import paramiko
 
@@ -82,6 +83,47 @@ class SSHFS(FS):
         'virtual': False,
     }
 
+    @classmethod
+    def _make_details_from_stat(cls, stat_result):
+        """Make an info dict from a stat_result object."""
+        details = {
+            '_write': ['accessed', 'modified'],
+            'accessed': stat_result.st_atime,
+            'modified': stat_result.st_mtime,
+            'size': stat_result.st_size,
+            'type': int(OSFS._get_type_from_stat(stat_result)),
+        }
+
+        # FIXME: need to determine server OS
+        # details['created'] = getattr(stat_result, 'st_birthtime', None)
+        # ctime_key = 'created' if _WINDOWS_PLATFORM else 'metadata_changed'
+        # details[ctime_key] = getattr(stat_result, 'st_ctime', None)
+        return details
+
+    @classmethod
+    def _make_access_from_stat(cls, stat_result):
+        access = {}
+        access['permissions'] = Permissions(
+            mode=stat_result.st_mode
+        ).dump()
+        access['gid'] = stat_result.st_gid
+        access['uid'] = stat_result.st_uid
+        # FIXME: need to determine server OS
+        # if not _WINDOWS_PLATFORM:
+        #     import grp
+        #     import pwd
+        #     try:
+        #         access['group'] = grp.getgrgid(access['gid']).gr_name
+        #     except KeyError:  # pragma: nocover
+        #         pass
+        #
+        #     try:
+        #         access['user'] = pwd.getpwuid(access['uid']).pw_name
+        #     except KeyError:  # pragma: nocover
+        #         pass
+        return access
+
+
     def __init__(self,
                  host,
                  user=None,
@@ -131,25 +173,7 @@ class SSHFS(FS):
 
         with convert_sshfs_errors('getinfo', path):
             _stat = self._sftp.lstat(_path)
-            _stat.st_ctime = None
-
-        info = {
-            'basic': {
-                'name': basename(_path),
-                'is_dir': stat.S_ISDIR(_stat.st_mode)
-            }
-        }
-        if 'details' in namespaces:
-            info['details'] = OSFS._make_details_from_stat(_stat)
-        if 'stat' in namespaces:
-            info['stat'] = {
-                k: getattr(stat, k)
-                for k in dir(stat) if k.startswith('st_')
-            }
-        if 'access' in namespaces:
-            info['access'] = OSFS._make_access_from_stat(_stat)
-
-        return Info(info)
+            return self._make_info(basename(_path), _stat, namespaces)
 
     def getsyspath(self, path):
         _path = self.validatepath(path)
@@ -277,6 +301,24 @@ class SSHFS(FS):
                             access.get('gid'))
             if 'permissions' in access:
                 self._chmod(path, access['permissions'].mode)
+
+    def _make_info(self, name, stat_result, namespaces):
+        info = {
+            'basic': {
+                'name': name,
+                'is_dir': stat.S_ISDIR(stat_result.st_mode)
+            }
+        }
+        if 'details' in namespaces:
+            info['details'] = self._make_details_from_stat(stat_result)
+        if 'stat' in namespaces:
+            info['stat'] = {
+                k: getattr(stat_result, k)
+                for k in dir(stat_result) if k.startswith('st_')
+            }
+        if 'access' in namespaces:
+            info['access'] = self._make_access_from_stat(stat_result)
+        return Info(info)
 
     def _chmod(self, path, mode):
         self._sftp.chmod(path, mode)
