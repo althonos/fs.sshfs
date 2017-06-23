@@ -52,6 +52,18 @@ class _SSHFileWrapper(RawWrapper):
         raise io.UnsupportedOperation('fileno')
 
 
+class _SSHServerPlatform(enum.IntFlag):
+    Windows = enum.auto()
+    Linux = enum.auto()
+    BSD = enum.auto()
+    Darwin = enum.auto()
+
+    Unix = Linux | BSD | Darwin
+
+    _Unknown = enum.auto()
+
+
+
 class SSHFS(FS):
     """A SSH filesystem using SFTP.
 
@@ -84,23 +96,6 @@ class SSHFS(FS):
     }
 
     @classmethod
-    def _make_details_from_stat(cls, stat_result):
-        """Make an info dict from a stat_result object."""
-        details = {
-            '_write': ['accessed', 'modified'],
-            'accessed': stat_result.st_atime,
-            'modified': stat_result.st_mtime,
-            'size': stat_result.st_size,
-            'type': int(OSFS._get_type_from_stat(stat_result)),
-        }
-
-        # FIXME: need to determine server OS
-        # details['created'] = getattr(stat_result, 'st_birthtime', None)
-        # ctime_key = 'created' if _WINDOWS_PLATFORM else 'metadata_changed'
-        # details[ctime_key] = getattr(stat_result, 'st_ctime', None)
-        return details
-
-    @classmethod
     def _make_access_from_stat(cls, stat_result):
         access = {}
         access['permissions'] = Permissions(
@@ -108,7 +103,8 @@ class SSHFS(FS):
         ).dump()
         access['gid'] = stat_result.st_gid
         access['uid'] = stat_result.st_uid
-        # FIXME: need to determine server OS
+
+        # FIXME: need to extract directly through SSH
         # if not _WINDOWS_PLATFORM:
         #     import grp
         #     import pwd
@@ -122,7 +118,6 @@ class SSHFS(FS):
         #     except KeyError:  # pragma: nocover
         #         pass
         return access
-
 
     def __init__(self,
                  host,
@@ -154,6 +149,7 @@ class SSHFS(FS):
             if keepalive > 0:
                 client.get_transport().set_keepalive(keepalive)
             self._sftp = client.open_sftp()
+            self._platform = self._guess_platform()
 
         except (paramiko.ssh_exception.SSHException,            # protocol errors
                 paramiko.ssh_exception.NoValidConnectionsError, # connexion errors
@@ -302,6 +298,28 @@ class SSHFS(FS):
             if 'permissions' in access:
                 self._chmod(path, access['permissions'].mode)
 
+    def _guess_platform(self):
+
+        def exec_command(cmd):
+            _, out, err = self._client.exec_command(cmd)
+            return out.read().strip() if not err.read().strip() else None
+
+        uname_sys = exec_command("uname -s")
+        sysinfo = exec_command("sysinfo")
+
+        if sysinfo is not None and sysinfo:
+            return _SSHServerPlatform.Windows
+
+        elif uname_sys is not None:
+            if uname_sys.endswith(b"BSD") or uname_sys == b"DragonFly":
+                return _SSHServerPlatform.BSD
+            elif uname_sys == b"Darwin":
+                return _SSHServerPlatform.Darwin
+            elif uname_sys == b"Linux":
+                return _SSHServerPlatform.Linux
+
+        return _SSHServerPlatform._Unknown
+
     def _make_info(self, name, stat_result, namespaces):
         info = {
             'basic': {
@@ -319,6 +337,22 @@ class SSHFS(FS):
         if 'access' in namespaces:
             info['access'] = self._make_access_from_stat(stat_result)
         return Info(info)
+
+    def _make_details_from_stat(self, stat_result):
+        """Make an info dict from a stat_result object."""
+        details = {
+            '_write': ['accessed', 'modified'],
+            'accessed': stat_result.st_atime,
+            'modified': stat_result.st_mtime,
+            'size': stat_result.st_size,
+            'type': int(OSFS._get_type_from_stat(stat_result)),
+        }
+
+        details['created'] = getattr(stat_result, 'st_birthtime', None)
+        ctime_key = 'created' if self._platform is _SSHServerPlatform.Windows \
+               else 'metadata_changed'
+        details[ctime_key] = getattr(stat_result, 'st_ctime', None)
+        return details
 
     def _chmod(self, path, mode):
         self._sftp.chmod(path, mode)
