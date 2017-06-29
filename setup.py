@@ -3,5 +3,5 @@
 import setuptools
 
 setuptools.setup(
-    setup_requires=["nose"],
+    setup_requires=["nose", "rednose"],
 )
