@@ -1,6 +1,24 @@
+from __future__ import unicode_literals
+
 from ._base import Opener
 from ._registry import registry
 from ..subfs import ClosingSubFS
+
+__license__ = "LGPL-2.1+"
+__copyright__ = "Copyright (c) 2017 Martin Larralde"
+__author__ = "Martin Larralde <martin.larralde@ens-cachan.fr>"
+__version__ = 'dev'
+
+
+# Dynamically get the version of the main module
+try:
+    _name = __name__.replace('.opener', '')
+    import pkg_resources
+    __version__ = pkg_resources.get_distribution(_name).version
+except Exception:
+    pkg_resources = None
+finally:
+    del pkg_resources
 
 @registry.install
 class SSHOpener(Opener):
