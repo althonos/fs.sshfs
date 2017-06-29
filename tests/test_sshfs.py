@@ -19,7 +19,7 @@ from . import utils
 
 
 @unittest.skipUnless(utils.CI or utils.DOCKER, "docker service unreachable.")
-class TestSSHFS(fs.test.FSTestCases):
+class BaseTestSSHFS(fs.test.FSTestCases):
 
     @classmethod
     def setUpClass(cls):
@@ -34,7 +34,7 @@ class TestSSHFS(fs.test.FSTestCases):
         cls.stopSFTPserver()
 
     def setUp(self):
-        super(TestSSHFS, self).setUp()
+        super(BaseTestSSHFS, self).setUp()
         self.fs.removetree("/")
 
     @classmethod
@@ -144,7 +144,7 @@ class TestSSHFSFail(unittest.TestCase):
             _ = fs.sshfs.SSHFS(host="localhost", user="nonsensicaluser")
 
 
-class TestSSHFSWithPassword(TestSSHFS, unittest.TestCase):
+class TestSSHFSWithPassword(BaseTestSSHFS, unittest.TestCase):
 
     def make_fs(self):
         ssh_fs = fs.open_fs('ssh://{user}:{pasw}@localhost:{port}'.format(
@@ -154,7 +154,7 @@ class TestSSHFSWithPassword(TestSSHFS, unittest.TestCase):
         return ssh_fs.opendir('/home/{}/test'.format(self.user), factory=ClosingSubFS)
 
 
-class TestSSHFSWithKey(TestSSHFS, unittest.TestCase):
+class TestSSHFSWithKey(BaseTestSSHFS, unittest.TestCase):
 
     @classmethod
     def makeRSAKey(cls):
