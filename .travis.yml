@@ -25,29 +25,34 @@ matrix:
 
 before_install:
 - docker pull sjourdan/alpine-sshd
-- pip install -r tests/requirements.txt -U
+- pip install -U https://github.com/Pyfilesystem/pyfilesystem2/archive/master.zip
+- pip install -U setuptools wheel
 
 install:
-- if [[ $TRAVIS_PYTHON_VERSION != 3.6 ]]; then pip install .; fi
-- pip install -U https://github.com/Pyfilesystem/pyfilesystem2/archive/master.zip
+- pip install .
 
 script:
-- green
+- python setup.py test
 
 after_script:
-- codecov
+- bash <(curl -s https://codecov.io/bash)
+
+before_deploy:
+# Check the readme doesn't contain errors
+- $(exit $(python setup.py check --restructuredtext 2>&1 | grep 'warning' -c >&1))
 
 deploy:
-- provider: pypi
+  provider: pypi
   user: althonos
   password:
     secure: q82KcRQ+Zm0MuZApN9ac1gT0kI7MrIwurcf1Vo82dk+GcMw7l6BSoWWNir106YfT9SEy4/BsstuMBr3qrIWfS2Tgja8FT2va9mU1gmROwhVgb6A94VadP9HsxaDX1vOlJt28Q0KLKndJlk4je563Pd7iij8R1LKyZVOkHiphCvG4czlV/dKMT6vluF3Wc4Py7rJld8Q00CHx5apsDjbxM48NYNIvMtgz1kZ3EAWbHQOLpIHCGFrmSnr/2sm0vKxomYt+RLWXuMuxGQEaRMXKvAefWGJNKR5R8jJlYcPBi5Zgf8YDnBoQrjYcij8rjXxYdU/weEywCS3Q6wIFrH/bA3WheyztGre24B6m4nfOiqhXhfHFu7zBC6CfXZcWLqOX0UKIfL/+CYDN+n9ziXC5GDz7oxxZTch2pQwOM5iDJKfcW6995U5fhyccOB9FJq5iJexE2AG3eeA39IQLZHyGQl3x9hyO3DyCBHuCzs6jrY0q//vFGHlXDKff7VGB4XvRGME/8XixTRCJozMVqpDVyzdxf7v5hEsmHCRkMtgCsiHCebjAPh9rAF5I5NetcT4UERv84o09Q+/gDpkHdxt+3UlbvMAV6bMFV8rVqxopH8dFuI2AJKW4f2I2X4qN8J/fIdhc3T8q8V9L/+dTHTbI+Jph5NoWbSo8c0vxysWdxuQ=
   on:
     tags: true
-    python: '3.6'
-    repo: althonos/pronto
+    python: 3.6
+    repo: althonos/fs.sshfs
   distributions: sdist bdist_wheel
   server: https://upload.pypi.org/legacy/
+  skip_upload_docs: true
 
 notifications:
   email:
