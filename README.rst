@@ -4,7 +4,7 @@ fs.sshfs
 |Source| |PyPI| |Travis| |Codecov| |Codacy| |Format| |License|
 
 .. |Codacy| image:: https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg?style=flat-square&maxAge=300
-   :target: https://www.codacy.com/app/althonos/fs-sshfs/dashboard
+   :target: https://www.codacy.com/app/althonos/fs.sshfs/dashboard
 
 .. |Travis| image:: https://img.shields.io/travis/althonos/fs.sshfs/master.svg?style=flat-square&maxAge=300
    :target: https://travis-ci.org/althonos/fs.sshfs/branches
@@ -24,7 +24,7 @@ fs.sshfs
 .. |License| image:: https://img.shields.io/pypi/l/fs.sshfs.svg?style=flat-square&maxAge=300
    :target: https://choosealicense.com/licenses/lgpl-2.1/
 
-.. |Source| image:: https://img.shields.io/badge/source-GitHub-green.svg?maxAge=300&style=flat-square
+.. |Source| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=300&style=flat-square
    :target: https://github.com/althonos/fs.sshfs
 
 
@@ -32,18 +32,18 @@ Requirements
 ------------
 
 +-------------------+-----------------+-------------------+--------------------+
-| **fs**            | |PyPI fs|       | |Source fs|       | |License fs|       |
-+-------------------+-----------------+-------------------+--------------------+
-| **paramiko**      | |PyPI paramiko| | |Source paramiko| | |License paramiko| |
+| **pyfilesystem2** | |PyPI fs|       | |Source fs|       | |License fs|       |
 +-------------------+-----------------+-------------------+--------------------+
 | **six**           | |PyPI six|      | |Source six|      | |License six|      |
++-------------------+-----------------+-------------------+--------------------+
+| **paramiko**      | |PyPI paramiko| | |Source paramiko| | |License paramiko| |
 +-------------------+-----------------+-------------------+--------------------+
 
 
 .. |License six| image:: https://img.shields.io/pypi/l/six.svg?maxAge=300&style=flat-square
    :target: https://choosealicense.com/licenses/mit/
 
-.. |Source six| image:: https://img.shields.io/badge/source-GitHub-green.svg?maxAge=300&style=flat-square
+.. |Source six| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=300&style=flat-square
    :target: https://github.com/benjaminp/six
 
 .. |PyPI six| image:: https://img.shields.io/pypi/v/six.svg?maxAge=300&style=flat-square
@@ -52,7 +52,7 @@ Requirements
 .. |License fs| image:: https://img.shields.io/badge/license-MIT-blue.svg?maxAge=300&style=flat-square
    :target: https://choosealicense.com/licenses/mit/
 
-.. |Source fs| image:: https://img.shields.io/badge/source-GitHub-green.svg?maxAge=300&style=flat-square
+.. |Source fs| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=300&style=flat-square
    :target: https://github.com/PyFilesystem/pyfilesystem2
 
 .. |PyPI fs| image:: https://img.shields.io/pypi/v/fs.svg?maxAge=300&style=flat-square
@@ -61,7 +61,7 @@ Requirements
 .. |License paramiko| image:: https://img.shields.io/pypi/l/paramiko.svg?maxAge=300&style=flat-square
    :target: https://choosealicense.com/licenses/lgpl-2.1/
 
-.. |Source paramiko| image:: https://img.shields.io/badge/source-GitHub-green.svg?maxAge=300&style=flat-square
+.. |Source paramiko| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=300&style=flat-square
    :target: https://github.com/paramiko/paramiko
 
 .. |PyPI paramiko| image:: https://img.shields.io/pypi/v/paramiko.svg?maxAge=300&style=flat-square
@@ -96,8 +96,6 @@ with the following optional parts:
 * ``resource``: defaults to the root directory (``"/"``)
 
 
-
-
 For a more granular way of connecting to a SSH server, use the `fs.sshfs.SSHFS`
 constructor, which signature is:
 
@@ -122,3 +120,13 @@ constructor, which signature is:
 
 Once created, the `SSHFS` filesystem behaves like any other filesystem
 (see the `Pyfilesystem2 documentation <https://pyfilesystem2.readthedocs.io>`_)
+
+
+See also
+--------
+
+* `fs <https://github.com/Pyfilesystem/pyfilesystem2>`_, the core pyfilesystem2 library
+* `fs.proxy <https://github.com/althonos/fs.proxy>`_, miscellaneous proxy filesystems
+  pyfilesystem2
+
+
