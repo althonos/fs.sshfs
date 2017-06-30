@@ -71,7 +71,7 @@ Requirements
 Installation
 ------------
 
-Install directly from PyPI, using `pip` ::
+Install directly from PyPI, using `pip <https://pip.pypa.io/>`_ ::
 
     pip install fs.sshfs
 
@@ -96,7 +96,7 @@ with the following optional parts:
 * ``resource``: defaults to the root directory (``"/"``)
 
 
-For a more granular way of connecting to a SSH server, use the `fs.sshfs.SSHFS`
+For a more granular way of connecting to an SSH server, use the ``fs.sshfs.SSHFS``
 constructor, which signature is:
 
 .. code:: python
@@ -118,7 +118,7 @@ constructor, which signature is:
     )
 
 
-Once created, the `SSHFS` filesystem behaves like any other filesystem
+Once created, the ``SSHFS`` filesystem behaves like any other filesystem
 (see the `Pyfilesystem2 documentation <https://pyfilesystem2.readthedocs.io>`_)
 
 
@@ -127,6 +127,4 @@ See also
 
 * `fs <https://github.com/Pyfilesystem/pyfilesystem2>`_, the core pyfilesystem2 library
 * `fs.proxy <https://github.com/althonos/fs.proxy>`_, miscellaneous proxy filesystems
-  pyfilesystem2
-
-
+  for pyfilesystem2
