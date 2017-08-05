@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
-from ._base import Opener
-from ._registry import registry
+from .base import Opener
 from ..subfs import ClosingSubFS
 
 __license__ = "LGPL-2.1+"
@@ -20,7 +19,7 @@ except Exception:
 finally:
     del pkg_resources
 
-@registry.install
+
 class SSHOpener(Opener):
     protocols = ['ssh']
 
