@@ -25,7 +25,6 @@ matrix:
 
 before_install:
 - docker pull sjourdan/alpine-sshd
-- pip install -U https://github.com/Pyfilesystem/pyfilesystem2/archive/master.zip
 - pip install -U setuptools wheel docutils
 
 install:
