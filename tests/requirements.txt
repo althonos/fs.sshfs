@@ -1,6 +1,3 @@
--r ../requirements.txt
-
 green
-coverage
 codecov
 docker
