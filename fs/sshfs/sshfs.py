@@ -3,13 +3,14 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 import io
-import six
+import pwd
+import grp
 import stat
-import enum
 import socket
+
+import six
 import paramiko
 
-from .error_tools import convert_sshfs_errors
 from .. import errors
 from ..base import FS
 from ..info import Info
@@ -19,6 +20,9 @@ from ..path import basename
 from ..permissions import Permissions
 from ..osfs import OSFS
 from ..mode import Mode
+
+from .error_tools import convert_sshfs_errors
+from .enums import Platform
 
 
 class _SSHFileWrapper(RawWrapper):
@@ -52,15 +56,7 @@ class _SSHFileWrapper(RawWrapper):
         raise io.UnsupportedOperation('fileno')
 
 
-class _SSHServerPlatform(enum.Enum):
-    _Unknow = 0
-    Windows = 1
 
-    Linux = 10
-    BSD = 11
-    Darwin = 12
-
-    Unix = (Linux, BSD, Darwin)
 
 
 
@@ -96,30 +92,6 @@ class SSHFS(FS):
         'virtual': False,
     }
 
-    @classmethod
-    def _make_access_from_stat(cls, stat_result):
-        access = {}
-        access['permissions'] = Permissions(
-            mode=stat_result.st_mode
-        ).dump()
-        access['gid'] = stat_result.st_gid
-        access['uid'] = stat_result.st_uid
-
-        # FIXME: need to extract directly through SSH
-        # if not _WINDOWS_PLATFORM:
-        #     import grp
-        #     import pwd
-        #     try:
-        #         access['group'] = grp.getgrgid(access['gid']).gr_name
-        #     except KeyError:  # pragma: nocover
-        #         pass
-        #
-        #     try:
-        #         access['user'] = pwd.getpwuid(access['uid']).pw_name
-        #     except KeyError:  # pragma: nocover
-        #         pass
-        return access
-
     def __init__(self,
                  host,
                  user=None,
@@ -150,7 +122,7 @@ class SSHFS(FS):
             if keepalive > 0:
                 client.get_transport().set_keepalive(keepalive)
             self._sftp = client.open_sftp()
-            self._platform = self._guess_platform()
+            self._platform = None
 
         except (paramiko.ssh_exception.SSHException,            # protocol errors
                 paramiko.ssh_exception.NoValidConnectionsError, # connexion errors
@@ -226,11 +198,6 @@ class SSHFS(FS):
         :raises fs.errors.ResourceNotFound: If `path` does not exist.
 
         """
-        #
-        # Buffering follows the paramiko spec, not the fs one
-        # (only difference is that buffering=1 means line based buffering,
-        # not an actual buffer size of 1.
-        # """
         self.check()
         _path = self.validatepath(path)
         _mode = Mode(mode)
@@ -299,27 +266,46 @@ class SSHFS(FS):
             if 'permissions' in access:
                 self._chmod(path, access['permissions'].mode)
 
+    @property
+    def platform(self):
+        if self._platform is None:
+            self._platform = self._guess_platform()
+        return self._platform
+
+    @property
+    def locale(self):
+        if self._locale is None:
+            self._locale = self._guess_locale()
+        return self._locale
+
+    def _exec_command(self, cmd):
+        _, out, err = self._client.exec_command(cmd)
+        return out.read().strip() if not err.read().strip() else None
+
     def _guess_platform(self):
 
-        def exec_command(cmd):
-            _, out, err = self._client.exec_command(cmd)
-            return out.read().strip() if not err.read().strip() else None
-
-        uname_sys = exec_command("uname -s")
-        sysinfo = exec_command("sysinfo")
+        uname_sys = self._exec_command("uname -s")
+        sysinfo = self._exec_command("sysinfo")
 
         if sysinfo is not None and sysinfo:
-            return _SSHServerPlatform.Windows
+            return Platform.Windows
 
         elif uname_sys is not None:
             if uname_sys.endswith(b"BSD") or uname_sys == b"DragonFly":
-                return _SSHServerPlatform.BSD
+                return Platform.BSD
             elif uname_sys == b"Darwin":
-                return _SSHServerPlatform.Darwin
+                return Platform.Darwin
             elif uname_sys == b"Linux":
-                return _SSHServerPlatform.Linux
+                return Platform.Linux
 
-        return _SSHServerPlatform._Unknown
+        return Platform._Unknown
+
+    def _guess_locale(self):
+        if self.platform in Platform.Unix:
+            locale = self._exec_command('locale charmap')
+            if locale is not None:
+                return locale.decode('ascii').lower()
+        return None
 
     def _make_info(self, name, stat_result, namespaces):
         info = {
@@ -350,10 +336,38 @@ class SSHFS(FS):
         }
 
         details['created'] = getattr(stat_result, 'st_birthtime', None)
-        ctime_key = 'created' if self._platform is _SSHServerPlatform.Windows \
+        ctime_key = 'created' if self.platform is Platform.Windows \
                else 'metadata_changed'
         details[ctime_key] = getattr(stat_result, 'st_ctime', None)
         return details
+
+    def _make_access_from_stat(self, stat_result):
+        access = {}
+        access['permissions'] = Permissions(
+            mode=stat_result.st_mode
+        ).dump()
+        access['gid'] = stat_result.st_gid
+        access['uid'] = stat_result.st_uid
+
+        if self.platform in Platform.Unix:
+
+            try:
+                getent_group = self._exec_command(
+                    'getent group {}'.format(stat_result.st_gid)).split(b':')
+                access['group'] = grp.struct_group(getent_group) \
+                                     .gr_name.decode(self.locale or 'utf-8')
+            except AttributeError:
+                pass
+
+            try:
+                getent_passw = self._exec_command(
+                    'getent passwd {}'.format(stat_result.st_uid)).split(b':')
+                access['user'] = pwd.struct_passwd(getent_passw) \
+                                    .pw_name.decode(self.locale or 'utf-8')
+            except AttributeError:
+                pass
+
+        return access
 
     def _chmod(self, path, mode):
         self._sftp.chmod(path, mode)
