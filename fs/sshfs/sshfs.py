@@ -351,21 +351,23 @@ class SSHFS(FS):
 
         if self.platform in Platform.Unix:
 
-            try:
-                getent_group = self._exec_command(
-                    'getent group {}'.format(stat_result.st_gid)).split(b':')
-                access['group'] = grp.struct_group(getent_group) \
-                                     .gr_name.decode(self.locale or 'utf-8')
-            except AttributeError:
-                pass
+            targets = [
+                {'db': 'group', 'id': access['gid'], 'len': 4, 'key': 'group',
+                 'name': lambda g: grp.struct_group(g).gr_name},
+                {'db': 'passwd', 'id': access['uid'], 'len': 7, 'key': 'user',
+                 'name': lambda g: pwd.struct_passwd(g).pw_name},
+            ]
 
-            try:
-                getent_passw = self._exec_command(
-                    'getent passwd {}'.format(stat_result.st_uid)).split(b':')
-                access['user'] = pwd.struct_passwd(getent_passw) \
-                                    .pw_name.decode(self.locale or 'utf-8')
-            except AttributeError:
-                pass
+            for target in targets:
+                try:
+                    getent = self._exec_command(
+                        'getent {db} {id}'.format(**target)).split(b':')
+                    if len(getent) < target['len']:
+                        getent += [b''] * (target['len'] - len(getent))
+                    access[target['key']] = \
+                        target['name'](getent).decode(self.locale or 'utf-8')
+                except AttributeError:
+                    pass
 
         return access
 
