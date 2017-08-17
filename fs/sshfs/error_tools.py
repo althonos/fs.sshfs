@@ -1,3 +1,6 @@
+# coding: utf-8
+"""Utils to work with `paramiko` errors.
+"""
 from __future__ import absolute_import
 from __future__ import unicode_literals
 

@@ -1,4 +1,6 @@
 # coding: utf-8
+"""Implementation of `SSHFS`.
+"""
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
@@ -29,30 +31,30 @@ class _SSHFileWrapper(RawWrapper):
     """A file on a remote SSH server.
     """
 
-    def seek(self, offset, whence=0):
+    def seek(self, offset, whence=0):  # noqa: D102
         if whence > 2:
             raise ValueError("invalid whence "
                              "({}, should be 0, 1 or 2)".format(whence))
         return self._f.seek(offset, whence)
 
-    def read(self, size=-1):
+    def read(self, size=-1):  # noqa: D102
         size = None if size==-1 else size
         return self._f.read(size)
 
-    def readline(self, size=-1):
+    def readline(self, size=-1):  # noqa: D102
         size = None if size==-1 else size
         return self._f.readline(size)
 
-    def truncate(self, size=None):
+    def truncate(self, size=None):  # noqa: D102
         size = size or self._f.tell()   # SFTPFile doesn't support
         return self._f.truncate(size)   # truncate without argument
 
-    def readlines(self, hint=-1):
+    def readlines(self, hint=-1):  # noqa: D102
         hint = None if hint==-1 else hint
         return self._f.readlines(hint)
 
     @staticmethod
-    def fileno():
+    def fileno():  # noqa: D102
         raise io.UnsupportedOperation('fileno')
 
 
@@ -92,16 +94,8 @@ class SSHFS(FS):
         'virtual': False,
     }
 
-    def __init__(self,
-                 host,
-                 user=None,
-                 passwd=None,
-                 pkey=None,
-                 timeout=10,
-                 port=22,
-                 keepalive=10,
-                 compress=False,
-                 ):
+    def __init__(self, host, user=None, passwd=None, pkey=None, timeout=10,
+                 port=22, keepalive=10, compress=False):  # noqa: D102
         super(SSHFS, self).__init__()
 
         try:
@@ -131,11 +125,11 @@ class SSHFS(FS):
             message = "Unable to create filesystem: {}".format(e)
             six.raise_from(errors.CreateFailed(message), e)
 
-    def close(self):
+    def close(self):  # noqa: D102
         self._client.close()
         super(SSHFS, self).close()
 
-    def getinfo(self, path, namespaces=None):
+    def getinfo(self, path, namespaces=None):  # noqa: D102
         self.check()
         namespaces = namespaces or ()
         _path = self.validatepath(path)
@@ -144,12 +138,12 @@ class SSHFS(FS):
             _stat = self._sftp.lstat(_path)
             return self._make_info(basename(_path), _stat, namespaces)
 
-    def getsyspath(self, path):
+    def getsyspath(self, path):  # noqa: D102
         _path = self.validatepath(path)
         return "ssh://{}@{}:{}{}".format(
             self._user, self._host, self._port, _path)
 
-    def listdir(self, path):
+    def listdir(self, path):  # noqa: D102
         self.check()
         _path = self.validatepath(path)
 
@@ -160,7 +154,7 @@ class SSHFS(FS):
         with convert_sshfs_errors('listdir', path):
             return self._sftp.listdir(_path)
 
-    def makedir(self, path, permissions=None, recreate=False):
+    def makedir(self, path, permissions=None, recreate=False):  # noqa: D102
         self.check()
         _permissions = permissions or Permissions(mode=0o755)
         _path = self.validatepath(path)
@@ -177,7 +171,7 @@ class SSHFS(FS):
 
         return self.opendir(path)
 
-    def openbin(self, path, mode='r', buffering=-1, **options):
+    def openbin(self, path, mode='r', buffering=-1, **options):  # noqa: D102
         """Open a binary file-like object.
 
         :param str path: A path on the filesystem.
@@ -216,7 +210,7 @@ class SSHFS(FS):
                     mode=_mode.to_platform_bin(),
                     bufsize=buffering))
 
-    def remove(self, path):
+    def remove(self, path):  # noqa: D102
         self.check()
         _path = self.validatepath(path)
 
@@ -230,7 +224,7 @@ class SSHFS(FS):
             with self._lock:
                 self._sftp.remove(_path)
 
-    def removedir(self, path):
+    def removedir(self, path):  # noqa: D102
         self.check()
         _path = self.validatepath(path)
 
@@ -244,7 +238,7 @@ class SSHFS(FS):
             with self._lock:
                 self._sftp.rmdir(path)
 
-    def setinfo(self, path, info):
+    def setinfo(self, path, info):  # noqa: D102
         self.check()
         _path = self.validatepath(path)
 
@@ -268,22 +262,38 @@ class SSHFS(FS):
 
     @property
     def platform(self):
+        """The platform the server is running on.
+
+        Returns:
+            fs.sshfs.enums.Platform: the platform of the remote server.
+        """
         if self._platform is None:
             self._platform = self._guess_platform()
         return self._platform
 
     @property
     def locale(self):
+        """The locale the server is running on.
+
+        Returns:
+            str: the locale of the remote server.
+        """
         if self._locale is None:
             self._locale = self._guess_locale()
         return self._locale
 
     def _exec_command(self, cmd):
+        """Run a command on the remote SSH server.
+        """
         _, out, err = self._client.exec_command(cmd)
         return out.read().strip() if not err.read().strip() else None
 
     def _guess_platform(self):
+        """Guess the platform of the remove server.
 
+        Returns:
+            fs.sshfs.enums.Platform: the guessed platform.
+        """
         uname_sys = self._exec_command("uname -s")
         sysinfo = self._exec_command("sysinfo")
 
@@ -301,6 +311,11 @@ class SSHFS(FS):
         return Platform._Unknown
 
     def _guess_locale(self):
+        """Guess the locale of the remote server.
+
+        Returns:
+            str: the guessed locale.
+        """
         if self.platform in Platform.Unix:
             locale = self._exec_command('locale charmap')
             if locale is not None:
@@ -308,6 +323,8 @@ class SSHFS(FS):
         return None
 
     def _make_info(self, name, stat_result, namespaces):
+        """Create an `Info` object from a stat result.
+        """
         info = {
             'basic': {
                 'name': name,
@@ -326,7 +343,8 @@ class SSHFS(FS):
         return Info(info)
 
     def _make_details_from_stat(self, stat_result):
-        """Make an info dict from a stat_result object."""
+        """Make a *details* dictionnary from a stat result.
+        """
         details = {
             '_write': ['accessed', 'modified'],
             'accessed': stat_result.st_atime,
@@ -342,6 +360,8 @@ class SSHFS(FS):
         return details
 
     def _make_access_from_stat(self, stat_result):
+        """Make an *access* dictionnary from a stat result.
+        """
         access = {}
         access['permissions'] = Permissions(
             mode=stat_result.st_mode
@@ -372,9 +392,13 @@ class SSHFS(FS):
         return access
 
     def _chmod(self, path, mode):
+        """Change the *mode* of a resource.
+        """
         self._sftp.chmod(path, mode)
 
     def _chown(self, path, uid, gid):
+        """Change the *owner* of a resource.
+        """
         if uid is None or gid is None:
             info = self.getinfo(path, namespaces=('access',))
             uid = uid or info.get('access', 'uid')
@@ -382,6 +406,8 @@ class SSHFS(FS):
         self._sftp.chown(path, uid, gid)
 
     def _utime(self, path, modified, accessed):
+        """Set the *accessed* and *modified* times of a resource.
+        """
         if accessed is not None or modified is not None:
             accessed = int(modified if accessed is None else accessed)
             modified = int(accessed if modified is None else modified)
