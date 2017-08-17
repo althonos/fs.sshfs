@@ -130,3 +130,5 @@ See also
   for pyfilesystem2
 * `fs.proxy <https://github.com/althonos/fs.proxy>`_, miscellaneous proxy filesystems
   for pyfilesystem2
+* `fs.smbfs <https://github.com/althonos/fs.smbfs>`_, Pyfilesystem2 over SMB
+  using pysmb
