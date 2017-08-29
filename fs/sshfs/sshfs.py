@@ -138,8 +138,10 @@ class SSHFS(FS):
             _stat = self._sftp.lstat(_path)
             return self._make_info(basename(_path), _stat, namespaces)
 
-    def getsyspath(self, path):  # noqa: D102
+    def geturl(self, path, purpose='download'):  # noqa: D102
         _path = self.validatepath(path)
+        if purpose != 'download':
+            raise errors.NoURL(path, purpose)
         return "ssh://{}@{}:{}{}".format(
             self._user, self._host, self._port, _path)
 
