@@ -131,6 +131,7 @@ class SSHFS(FS):
         self._host = host = config.get('hostname')
         self._port = port = int(config.get('port', port))
         self._client = client = paramiko.SSHClient()
+        self._locale = None
 
         try:
 
@@ -315,6 +316,10 @@ class SSHFS(FS):
 
     def _exec_command(self, cmd):
         """Run a command on the remote SSH server.
+
+        Returns:
+            bytes: the output of the command, if it didn't fail
+            None: if the error pipe of the command was not empty
         """
         _, out, err = self._client.exec_command(cmd)
         return out.read().strip() if not err.read().strip() else None
@@ -394,9 +399,7 @@ class SSHFS(FS):
         """Make an *access* dictionnary from a stat result.
         """
         access = {}
-        access['permissions'] = Permissions(
-            mode=stat_result.st_mode
-        ).dump()
+        access['permissions'] = Permissions(mode=stat_result.st_mode).dump()
         access['gid'] = stat_result.st_gid
         access['uid'] = stat_result.st_uid
 
@@ -410,15 +413,12 @@ class SSHFS(FS):
             ]
 
             for target in targets:
-                try:
-                    getent = self._exec_command(
-                        'getent {db} {id}'.format(**target)).split(b':')
-                    if len(getent) < target['len']:
-                        getent += [b''] * (target['len'] - len(getent))
-                    access[target['key']] = \
-                        target['name'](getent).decode(self.locale or 'utf-8')
-                except AttributeError:
-                    pass
+                getent = self._exec_command(
+                    'getent {db} {id}'.format(**target)).split(b':')
+                if len(getent) < target['len']:
+                    getent += [b''] * (target['len'] - len(getent))
+                access[target['key']] = \
+                    target['name'](getent).decode(self.locale or 'utf-8')
 
         return access
 

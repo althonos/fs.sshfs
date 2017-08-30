@@ -114,3 +114,7 @@ class TestCreate(unittest.TestCase):
             ])
         ssh_fs = SSHFS('test_host', self.user, config_path=self.config_file)
         self.assertFunctional(ssh_fs)
+
+    def test_sshconfig_notfound(self):
+        ssh_fs = SSHFS('localhost', self.user, self.pasw, port=self.port, config_path='zzzz')
+        self.assertFunctional(ssh_fs)
