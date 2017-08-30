@@ -66,21 +66,25 @@ class _SSHFileWrapper(RawWrapper):
 class SSHFS(FS):
     """A SSH filesystem using SFTP.
 
-    :param str host: A SSH host, e.g. ``shell.openshells.net``.
-    :param str user: A username (default is current user username).
-    :param str passwd: Password for the server, or ``None`` for
-        passwordless / key authentification. If given, it will be
-        immediately discared after establishing the connection.
-    :param pkey: A private key or a list of private keys to use. If none
-        provided, the SSH Agent will be used to look for keys.
-    :type pkey: str, list[str] or ``paramiko.PKey``
-    :param int port: Port number (default is 22).
-    :param int keepalive: The number of second after which a keep-alive
-        message will be sent (set to 0 to disable keepalive, default is 10)
-    :param bool compress: If the messages should be transfered or not
-        (default: False).
+    Arguments:
+        host (str): a SSH host or IP adress, e.g. ``shell.openshells.net``
+        user (str): the username to connect with (defaults to the current user)
+        passwd (str): Password for the server, or ``None`` for passwordless
+            authentification. If given, it will be discarded immediately after
+            establishing the connection.
+        pkey (paramiko.PKey): a private key or a list of private key  to use.
+            If ``None`` is supplied, the SSH Agent will be used to look for
+            keys.
+        port (int): Port number (defaults to 22).
+        keepalive (int): the number of seconds after which a keep-alive message
+            is sent (set to 0 to disable keepalive, default is 10).
+        compress (bool): set to ``True`` to compress the messages (disable by
+            default).
 
-    :raises `fs.errors.CreateFailed`: If the server could not be connected to.
+    Raises:
+        fs.errors.CreateFailed: when the filesystem could not be created. The
+            source exception is stored as the ``exc`` attribute of the
+            ``CreateFailed`` error.
     """
 
 
@@ -123,7 +127,7 @@ class SSHFS(FS):
                 socket.gaierror, socket.timeout) as e:          # TCP errors
 
             message = "Unable to create filesystem: {}".format(e)
-            six.raise_from(errors.CreateFailed(message), e)
+            raise errors.CreateFailed(message, exc=exc)
 
     def close(self):  # noqa: D102
         self._client.close()
@@ -176,23 +180,23 @@ class SSHFS(FS):
     def openbin(self, path, mode='r', buffering=-1, **options):  # noqa: D102
         """Open a binary file-like object.
 
-        :param str path: A path on the filesystem.
-        :param str mode: Mode to open file (must be a valid non-text
-          mode). Since this method only opens binary files, the `b` in
-          the mode string is implied.
-        :param buffering: Buffering policy (-1 to use default
-          buffering, 0 to disable buffering, 1 to enable line based
-          buffering, or any larger positive integer to indicate buffer size).
-        :type buffering: int
-        :param options: Keyword parameters for any additional
-          information required by the filesystem (if any).
-        :rtype: file object
+        Arguments:
+            path (str): A path on the filesystem.
+            mode (str): Mode to open the file (must be a valid, non-text mode).
+                Since this method only opens binary files, the ``b`` in the mode
+                is implied.
+            buffering (int): the buffering policy (-1 to use default buffering,
+                0 to disable completely, 1 to enable line based buffering, or
+                any larger positive integer for a custom buffer size).
 
-        :raises fs.errors.FileExpected: If the path is not a file.
-        :raises fs.errors.FileExists: If the file exists, and
-          *exclusive mode* is specified (`x` in the mode).
-        :raises fs.errors.ResourceNotFound: If `path` does not exist.
+        Raises:
+            fs.errors.FileExpected: if the path if not a file.
+            fs.errors.FileExists: if the file already exists and
+                *exclusive mode* is specified (``x`` in the mode).
+            fs.errors.ResourceNotFound: if the path does not exist.
 
+        Returns:
+            io.IOBase: a file handle.
         """
         self.check()
         _path = self.validatepath(path)
@@ -217,9 +221,8 @@ class SSHFS(FS):
         _path = self.validatepath(path)
 
         # NB: this will raise ResourceNotFound
-        # and as expected by the specifications
-        _type = self.gettype(_path)
-        if _type is ResourceType.directory:
+        # as expected by the specifications
+        if self.getinfo(_path).is_dir:
             raise errors.FileExpected(path)
 
         with convert_sshfs_errors('remove', path):
