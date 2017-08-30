@@ -131,6 +131,12 @@ with each argument explained below:
 Once created, the ``SSHFS`` filesystem behaves like any other filesystem
 (see the `Pyfilesystem2 documentation <https://pyfilesystem2.readthedocs.io>`_).
 
+``SSHFS`` are aware of `SSH config files <http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/>`_
+and as such, one of the hosts in the configuration file can be provided as the
+``host`` argument for the filesystem to connect to the server with the proper
+configuration values.
+
+
 Feedback
 --------
 
