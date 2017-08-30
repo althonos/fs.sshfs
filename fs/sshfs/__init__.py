@@ -15,7 +15,7 @@ __version__ = 'dev'
 try:
     import pkg_resources
     __version__ = pkg_resources.get_distribution(__name__).version
-except Exception:
+except Exception: # pragma: no cover
     pkg_resources = None
 finally:
     del pkg_resources

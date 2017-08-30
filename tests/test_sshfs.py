@@ -2,63 +2,58 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import six
 import stat
 import time
+import uuid
 import unittest
 import contextlib
+
 import paramiko
 import docker
 
+import fs.path
 import fs.test
 import fs.errors
-import fs.sshfs
+from fs.sshfs import SSHFS
 from fs.subfs import ClosingSubFS
 from fs.permissions import Permissions
 
 from . import utils
 
 
-@unittest.skipUnless(utils.CI or utils.DOCKER, "docker service unreachable.")
-class BaseTestSSHFS(fs.test.FSTestCases):
+@unittest.skipIf(utils.docker_client is None, "docker service unreachable.")
+class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
+
+    user = "user"
+    pasw = "pass"
+    port = 2222
 
     @classmethod
     def setUpClass(cls):
-        cls.user = "foo"
-        cls.pasw = "pass"
-        cls.port = 2222
-        cls.docker_client = docker.from_env(version='auto')
-        cls.startSFTPserver()
+        super(TestSSHFS, cls).setUpClass()
+        cls.sftp_container = utils.startServer(
+            utils.docker_client, cls.user, cls.pasw, cls.port)
 
     @classmethod
     def tearDownClass(cls):
-        cls.stopSFTPserver()
-
-    def setUp(self):
-        super(BaseTestSSHFS, self).setUp()
-        self.fs.removetree("/")
-
-    @classmethod
-    def startSFTPserver(cls):
-        cls._sftp_container = cls.docker_client.containers.run(
-            "sjourdan/alpine-sshd",
-            detach=True, ports={'22/tcp': cls.port},
-            environment={'USER': cls.user, 'PASSWORD': cls.pasw},
-        )
-        time.sleep(0.5)
-
-    @classmethod
-    def stopSFTPserver(cls):
-        cls._sftp_container.kill()
-        cls._sftp_container.remove()
+        utils.stopServer(cls.sftp_container)
+        super(TestSSHFS, cls).tearDownClass()
 
     @staticmethod
     def destroy_fs(fs):
         fs.close()
         del fs
 
+    def make_fs(self):
+        self.ssh_fs = SSHFS('localhost', self.user, self.pasw, port=self.port)
+        self.test_folder = fs.path.join('/home', self.user, uuid.uuid4().hex)
+        self.ssh_fs.makedir(self.test_folder, recreate=True)
+        return self.ssh_fs.opendir(self.test_folder, factory=ClosingSubFS)
+
     def test_chmod(self):
         self.fs.touch("test.txt")
-        remote_path = "/home/{}/test/test.txt".format(self.user)
+        remote_path = fs.path.join(self.test_folder, "test.txt")
 
         # Initial permissions
         info = self.fs.getinfo("test.txt", ["access"])
@@ -89,7 +84,7 @@ class BaseTestSSHFS(fs.test.FSTestCases):
     def test_chown(self):
 
         self.fs.touch("test.txt")
-        remote_path = "/home/{}/test/test.txt".format(self.user)
+        remote_path = fs.path.join(self.test_folder, "test.txt")
         info = self.fs.getinfo("test.txt", namespaces=["access"])
         gid, uid = info.get('access', 'uid'), info.get('access', 'gid')
 
@@ -130,57 +125,3 @@ class BaseTestSSHFS(fs.test.FSTestCases):
         self.fs.setinfo("test.txt", {'details': {'modified': 100, 'accessed': 200}})
         self.assertEqual(get_accessed(self.fs), 200)
         self.assertEqual(get_modified(self.fs), 100)
-
-
-
-class TestSSHFSFail(unittest.TestCase):
-
-    def test_unknown_host(self):
-        with self.assertRaises(fs.errors.CreateFailed):
-            _ = fs.sshfs.SSHFS(host="unexisting-hostname")
-
-    def test_wrong_user(self):
-        with self.assertRaises(fs.errors.CreateFailed):
-            _ = fs.sshfs.SSHFS(host="localhost", user="nonsensicaluser")
-
-
-class TestSSHFSWithPassword(BaseTestSSHFS, unittest.TestCase):
-
-    def make_fs(self):
-        ssh_fs = fs.open_fs('ssh://{user}:{pasw}@localhost:{port}'.format(
-            user=self.user, pasw=self.pasw, port=self.port,
-        ))
-        ssh_fs.makedir('/home/{}/test'.format(self.user), recreate=True)
-        return ssh_fs.opendir('/home/{}/test'.format(self.user), factory=ClosingSubFS)
-
-
-class TestSSHFSWithKey(BaseTestSSHFS, unittest.TestCase):
-
-    @classmethod
-    def makeRSAKey(cls):
-        cls.rsa_key = paramiko.RSAKey.generate(bits=2048)
-
-    @classmethod
-    def addKeyToServer(cls):
-        with contextlib.closing(paramiko.SSHClient()) as client:
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect('localhost', cls.port, cls.user, cls.pasw)
-            with contextlib.closing(client.open_sftp()) as sftp:
-                sftp.mkdir('/home/{}/.ssh'.format(cls.user))
-                with sftp.open('/home/{}/.ssh/authorized_keys'.format(cls.user), 'w') as f:
-                    f.write("{} {}\n".format(
-                        cls.rsa_key.get_name(), cls.rsa_key.get_base64()
-                    ).encode('utf-8'))
-
-    @classmethod
-    def setUpClass(cls):
-        super(TestSSHFSWithKey, cls).setUpClass()
-        cls.makeRSAKey()
-        cls.addKeyToServer()
-
-    def make_fs(self):
-        ssh_fs = fs.sshfs.SSHFS('localhost',
-            user=self.user, port=self.port, pkey=self.rsa_key
-        )
-        ssh_fs.makedir('/home/{}/test'.format(self.user), recreate=True)
-        return ssh_fs.opendir('/home/{}/test'.format(self.user), factory=ClosingSubFS)
