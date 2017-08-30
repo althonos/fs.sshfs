@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from __future__ import absolute_import
 
 import io
+import os
 import pwd
 import grp
 import stat
@@ -98,21 +99,47 @@ class SSHFS(FS):
         'virtual': False,
     }
 
+    @staticmethod
+    def _get_ssh_config(self, config_path='~/.ssh/config'):
+        """Extract the configuration located at ``config_path``.
+
+        Returns:
+            paramiko.SSHConfig: the configuration instance.
+        """
+        ssh_config = paramiko.SSHConfig()
+        try:
+            with open(os.path.realpath(os.path.expanduser(config_path))) as f:
+                ssh_config.parse(f)
+        except IOError:
+            pass
+        return ssh_config
+
+
     def __init__(self, host, user=None, passwd=None, pkey=None, timeout=10,
-                 port=22, keepalive=10, compress=False):  # noqa: D102
+                 port=22, keepalive=10, compress=False,
+                 config_path='~/.ssh/config'):  # noqa: D102
         super(SSHFS, self).__init__()
+
+        # Attempt to get a configuration for the given host
+        ssh_config = self._get_ssh_config(config_path)
+        config = ssh_config.lookup(host)
+        pkey = config.get('identityfile') or pkey
+
+        # Extract the given info
+        pkey, key_filename = (pkey, None) \
+            if isinstance(pkey, paramiko.PKey) else (None, pkey)
+        self._user = user = user or config.get('user')
+        self._host = host = config.get('hostname')
+        self._port = port = int(config.get('port', port))
+        self._client = client = paramiko.SSHClient()
 
         try:
 
             # TODO: add more options
-            self._user = user
-            self._host = host
-            self._port = port
-            self._client = client = paramiko.SSHClient()
             client.load_system_host_keys()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(
-                host, port, user, passwd, pkey,
+                host, port, user, passwd, pkey=pkey, key_filename=key_filename,
                 look_for_keys=True if pkey is None else False,
                 compress=compress, timeout=timeout
             )
@@ -127,7 +154,7 @@ class SSHFS(FS):
                 socket.gaierror, socket.timeout) as e:          # TCP errors
 
             message = "Unable to create filesystem: {}".format(e)
-            raise errors.CreateFailed(message, exc=exc)
+            raise errors.CreateFailed(message)
 
     def close(self):  # noqa: D102
         self._client.close()
