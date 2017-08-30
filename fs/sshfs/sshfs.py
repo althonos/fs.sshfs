@@ -100,7 +100,7 @@ class SSHFS(FS):
     }
 
     @staticmethod
-    def _get_ssh_config(self, config_path='~/.ssh/config'):
+    def _get_ssh_config(config_path='~/.ssh/config'):
         """Extract the configuration located at ``config_path``.
 
         Returns:
@@ -124,9 +124,8 @@ class SSHFS(FS):
         ssh_config = self._get_ssh_config(config_path)
         config = ssh_config.lookup(host)
         pkey = config.get('identityfile') or pkey
-
         # Extract the given info
-        pkey, key_filename = (pkey, None) \
+        pkey, keyfile= (pkey, None) \
             if isinstance(pkey, paramiko.PKey) else (None, pkey)
         self._user = user = user or config.get('user')
         self._host = host = config.get('hostname')
@@ -139,8 +138,8 @@ class SSHFS(FS):
             client.load_system_host_keys()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(
-                host, port, user, passwd, pkey=pkey, key_filename=key_filename,
-                look_for_keys=True if pkey is None else False,
+                host, port, user, passwd, pkey=pkey, key_filename=keyfile,
+                look_for_keys=True if (pkey and keyfile) is None else False,
                 compress=compress, timeout=timeout
             )
 
