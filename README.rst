@@ -79,47 +79,66 @@ Install directly from PyPI, using `pip <https://pip.pypa.io/>`_ ::
 Usage
 -----
 
+Opener
+''''''
+
 Use ``fs.open_fs`` to open a filesystem with an SSH
 `FS URL <https://pyfilesystem2.readthedocs.io/en/latest/openers.html>`_:
 
 .. code:: python
 
    import fs
-   my_fs = fs.open_fs("ssh://user:password@host:port/resource")
-
-with the following optional parts:
-
-* ``user``: defaults to the current user
-* ``password``: if none provided, passwordless authentification methods are
-  used (either using public keys or no authentification to connect to the host)
-* ``port``: defaults to the usual SSH port (port 22)
-* ``resource``: defaults to the root directory (``"/"``)
+   my_fs = fs.open_fs("ssh://[user[:password]@]host[:port]/[directory]")
 
 
-For a more granular way of connecting to an SSH server, use the ``fs.sshfs.SSHFS``
-constructor, which signature is:
+Constructor
+'''''''''''
+
+For a more granular way of connecting to an SSH server, use the
+``fs.sshfs.SSHFS`` constructor, which signature is:
 
 .. code:: python
 
     from fs.sshfs import SSHFS
     my_fs = SSHFS(
-      host,            # The name or adress of the SSH server
-      user=None,       # an optional username, defaults to the current user
-      passwd=None,     # an optional password, not needed if using a public key or
-                       #   an SSH server without authentification
-      pkey=None,       # a `paramiko.PKey` object, used to connect with a
-                       #   specific key (undiscoverable key, etc.)
-      timeout=10,      # The timeout of the connection, in seconds
-                       #   (None to disable)
-      port=22,         # The port to which to connect, default to default SSH port
-      keepalive=10,    # The interval of time between keepalive packets, in
-                       #    seconds (0 to disable)
-      compress=False   # Compress the communications with the server
+      host, user=None, paswd=None, pkey=None, timeout=10, port=22,
+      keepalive=10, compress=False, config_path='~/.ssh/config'
     )
 
+with each argument explained below:
+
+``host``
+  the name or IP address of the SSH server
+``user``
+  the username to connect with, defaults to the current user.
+``passwd``
+  an optional password, used to connect directly to the server or to
+  decrypt the public key, if any given.
+``pkey``
+  a `paramiko.PKey <http://docs.paramiko.org/en/2.2/api/keys.html#module-paramiko.pkey>`_
+  object, a path, or a list of paths to an SSH key.
+``timeout``
+  the timeout, in seconds, for networking operations.
+``port``
+  the port the SSH server is listening on.
+``keepalive``
+  the interval of time between keepalive packets, in seconds. Set to 0 to disable.
+``compress``
+  set to ``True`` to compress the communications with the server
+``config_path``
+  the path to an OpenSSH configuration file.
 
 Once created, the ``SSHFS`` filesystem behaves like any other filesystem
-(see the `Pyfilesystem2 documentation <https://pyfilesystem2.readthedocs.io>`_)
+(see the `Pyfilesystem2 documentation <https://pyfilesystem2.readthedocs.io>`_).
+
+Feedback
+--------
+
+Found a bug ? Have an enhancement request ? Head over to the
+`GitHub issue tracker <https://github.com/althonos/fs.sshfs/issues>`_ of the
+project if you need to report or ask something. If you are filling in on a bug,
+please include as much information as you can about the issue, and try to
+recreate the same bug in a simple, easily reproductible situation.
 
 
 See also
