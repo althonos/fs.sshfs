@@ -111,8 +111,8 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         self.fs.touch("test.txt")
 
         self.fs.setinfo("test.txt", {'details': {'accessed': None, 'modified': None}})
-        self.assertLessEqual(time.time()-get_accessed(self.fs), 1)
-        self.assertLessEqual(time.time()-get_modified(self.fs), 1)
+        self.assertLessEqual(time.time()-get_accessed(self.fs), 2)
+        self.assertLessEqual(time.time()-get_modified(self.fs), 2)
 
         self.fs.setinfo("test.txt", {'details': {'accessed': 0}})
         self.assertEqual(get_accessed(self.fs), 0)
