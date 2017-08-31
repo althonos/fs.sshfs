@@ -74,7 +74,26 @@ class TestCreate(unittest.TestCase):
         test_folder = '/home/{}/{}'.format(self.user, uuid.uuid4().hex)
         ssh_fs.makedir(test_folder)
         with ssh_fs.opendir(test_folder) as test_fs:
-            pass
+
+            test_fs.makedirs('foo/bär/baz')
+            test_fs.settext('foo/test.txt', 'this is a test.')
+
+            self.assertFalse(test_fs.getinfo('foo/test.txt').is_dir)
+            self.assertTrue(test_fs.getinfo('foo/bär').is_dir)
+            self.assertEqual(sorted(test_fs.listdir('foo')), ['bär', 'test.txt'])
+
+            self.assertRaises(fs.errors.ResourceNotFound, test_fs.remove, 'dog')
+            test_fs.move('foo/test.txt', 'foo/bär/test.txt')
+            self.assertFalse(test_fs.exists('foo/test.txt'))
+            self.assertTrue(test_fs.exists('foo/bär/test.txt'))
+            self.assertEqual(test_fs.gettext('foo/bär/test.txt'), 'this is a test.')
+
+            self.assertRaises(fs.errors.DirectoryNotEmpty, test_fs.removedir, 'foo/bär')
+            test_fs.removedir('foo/bär/baz')
+            self.assertFalse(test_fs.exists('foo/bär/baz'))
+
+
+
         ssh_fs.close()
 
     def test_password(self):
