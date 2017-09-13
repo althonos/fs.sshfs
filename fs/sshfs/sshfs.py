@@ -36,7 +36,8 @@ class _SSHFileWrapper(RawWrapper):
         if whence > 2:
             raise ValueError("invalid whence "
                              "({}, should be 0, 1 or 2)".format(whence))
-        return self._f.seek(offset, whence)
+        self._f.seek(offset, whence)
+        return self.tell()
 
     def read(self, size=-1):  # noqa: D102
         size = None if size==-1 else size
@@ -48,7 +49,8 @@ class _SSHFileWrapper(RawWrapper):
 
     def truncate(self, size=None):  # noqa: D102
         size = size or self._f.tell()   # SFTPFile doesn't support
-        return self._f.truncate(size)   # truncate without argument
+        self._f.truncate(size)          # truncate without argument
+        return size
 
     def readlines(self, hint=-1):  # noqa: D102
         hint = None if hint==-1 else hint
@@ -57,11 +59,6 @@ class _SSHFileWrapper(RawWrapper):
     @staticmethod
     def fileno():  # noqa: D102
         raise io.UnsupportedOperation('fileno')
-
-
-
-
-
 
 
 class SSHFS(FS):
