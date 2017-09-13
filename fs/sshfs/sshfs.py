@@ -48,8 +48,8 @@ class _SSHFileWrapper(RawWrapper):
         return self._f.readline(size)
 
     def truncate(self, size=None):  # noqa: D102
-        size = size or self._f.tell()   # SFTPFile doesn't support
-        self._f.truncate(size)          # truncate without argument
+        size = size if size is not None else self._f.tell()  # SFTPFile doesn't support
+        self._f.truncate(size)                               # truncate without argument
         return size
 
     def readlines(self, hint=-1):  # noqa: D102
