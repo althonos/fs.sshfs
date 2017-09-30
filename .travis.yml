@@ -25,16 +25,13 @@ matrix:
 
 before_install:
 - docker pull sjourdan/alpine-sshd
-- pip install -U setuptools wheel docutils
+- pip install -U setuptools wheel
 
 install:
-- pip install .
-
-before_script:
-- pip install -r tests/requirements.txt
+- pip install .[dev, test]
 
 script:
-- python setup.py test
+- green
 
 after_script:
 - codecov
