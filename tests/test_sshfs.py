@@ -7,10 +7,8 @@ import stat
 import time
 import uuid
 import unittest
-import contextlib
 
 import paramiko
-import docker
 
 import fs.path
 import fs.test

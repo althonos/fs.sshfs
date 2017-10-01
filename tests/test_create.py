@@ -7,7 +7,6 @@ import uuid
 import unittest
 import tempfile
 
-import docker
 import paramiko
 
 import fs.errors
