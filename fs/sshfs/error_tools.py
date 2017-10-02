@@ -6,14 +6,13 @@ from __future__ import unicode_literals
 
 import errno
 import sys
-import contextlib
 
 import six
 
 from .. import errors
 
 
-class _ConvertSSHFSErrors(contextlib.AbstractContextManager):
+class _ConvertSSHFSErrors(object):
     """Context manager to convert OSErrors in to FS Errors."""
 
     FILE_ERRORS = {
