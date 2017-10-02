@@ -22,40 +22,8 @@ from ..permissions import Permissions
 from ..osfs import OSFS
 from ..mode import Mode
 
+from .file import SSHFile
 from .error_tools import convert_sshfs_errors
-
-
-class _SSHFileWrapper(RawWrapper):
-    """A file on a remote SSH server.
-    """
-
-    def seek(self, offset, whence=0):  # noqa: D102
-        if whence > 2:
-            raise ValueError("invalid whence "
-                             "({}, should be 0, 1 or 2)".format(whence))
-        self._f.seek(offset, whence)
-        return self.tell()
-
-    def read(self, size=-1):  # noqa: D102
-        size = None if size==-1 else size
-        return self._f.read(size)
-
-    def readline(self, size=-1):  # noqa: D102
-        size = None if size==-1 else size
-        return self._f.readline(size)
-
-    def truncate(self, size=None):  # noqa: D102
-        size = size if size is not None else self._f.tell()  # SFTPFile doesn't support
-        self._f.truncate(size)                               # truncate without argument
-        return size
-
-    def readlines(self, hint=-1):  # noqa: D102
-        hint = None if hint==-1 else hint
-        return self._f.readlines(hint)
-
-    @staticmethod
-    def fileno():  # noqa: D102
-        raise io.UnsupportedOperation('fileno')
 
 
 class SSHFS(FS):
@@ -233,10 +201,11 @@ class SSHFS(FS):
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
             with convert_sshfs_errors('openbin', path):
-                return _SSHFileWrapper(self._sftp.open(
+                return SSHFile(self._sftp.open(
                     _path,
                     mode=_mode.to_platform_bin(),
-                    bufsize=buffering))
+                    bufsize=buffering
+                ))
 
     def remove(self, path):  # noqa: D102
         self.check()
