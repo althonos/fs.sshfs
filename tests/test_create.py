@@ -63,7 +63,7 @@ class TestCreate(unittest.TestCase):
         rsa_key.write_private_key_file(self.key_file)
         #with open(key_fd, 'w+') as key_handle:
         # Create an empty config file
-        config_fd, self.config_file = tempfile.mkstemp()
+        _, self.config_file = tempfile.mkstemp()
 
     def tearDown(self):
         os.remove(self.key_file)

@@ -2,13 +2,10 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-import six
 import stat
 import time
 import uuid
 import unittest
-
-import paramiko
 
 import fs.path
 import fs.test
