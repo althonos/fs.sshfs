@@ -136,7 +136,8 @@ class SSHFS(FS):
             client.load_system_host_keys()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(
-                host, port, user, passwd, pkey=pkey, key_filename=keyfile,
+                socket.gethostbyname(host), port, user, passwd,
+                pkey=pkey, key_filename=keyfile,
                 look_for_keys=True if (pkey and keyfile) is None else False,
                 compress=compress, timeout=timeout
             )
