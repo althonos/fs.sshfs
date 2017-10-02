@@ -5,13 +5,15 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import errno
-import six
 import sys
+import contextlib
+
+import six
 
 from .. import errors
 
 
-class _ConvertSSHFSErrors(object):
+class _ConvertSSHFSErrors(contextlib.AbstractContextManager):
     """Context manager to convert OSErrors in to FS Errors."""
 
     FILE_ERRORS = {
