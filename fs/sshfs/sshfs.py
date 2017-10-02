@@ -6,8 +6,6 @@ from __future__ import absolute_import
 
 import io
 import os
-import pwd
-import grp
 import stat
 import socket
 
@@ -25,7 +23,6 @@ from ..osfs import OSFS
 from ..mode import Mode
 
 from .error_tools import convert_sshfs_errors
-from .enums import Platform
 
 
 class _SSHFileWrapper(RawWrapper):
@@ -330,19 +327,18 @@ class SSHFS(FS):
         """
         uname_sys = self._exec_command("uname -s")
         sysinfo = self._exec_command("sysinfo")
-
-        if sysinfo is not None and sysinfo:
-            return Platform.Windows
-
-        elif uname_sys is not None:
-            if uname_sys.endswith(b"BSD") or uname_sys == b"DragonFly":
-                return Platform.BSD
+        if uname_sys is not None:
+            if uname_sys == b"FreeBSD":
+                return "freebsd"
             elif uname_sys == b"Darwin":
-                return Platform.Darwin
+                return "darwin"
             elif uname_sys == b"Linux":
-                return Platform.Linux
-
-        return Platform._Unknown
+                return "linux"
+            elif uname_sys.startswith(b"CYGWIN"):
+                return "cygwin"
+        elif sysinfo is not None and sysinfo:
+            return "win32"
+        return "unknown"
 
     def _guess_locale(self):
         """Guess the locale of the remote server.
@@ -350,7 +346,7 @@ class SSHFS(FS):
         Returns:
             str: the guessed locale.
         """
-        if self.platform in Platform.Unix:
+        if self.platform in ("linux", "darwin", "freebsd"):
             locale = self._exec_command('locale charmap')
             if locale is not None:
                 return locale.decode('ascii').lower()
@@ -388,8 +384,7 @@ class SSHFS(FS):
         }
 
         details['created'] = getattr(stat_result, 'st_birthtime', None)
-        ctime_key = 'created' if self.platform is Platform.Windows \
-               else 'metadata_changed'
+        ctime_key = 'created' if self.platform=="win32" else 'metadata_changed'
         details[ctime_key] = getattr(stat_result, 'st_ctime', None)
         return details
 
@@ -401,22 +396,13 @@ class SSHFS(FS):
         access['gid'] = stat_result.st_gid
         access['uid'] = stat_result.st_uid
 
-        if self.platform in Platform.Unix:
-
-            targets = [
-                {'db': 'group', 'id': access['gid'], 'len': 4, 'key': 'group',
-                 'name': lambda g: grp.struct_group(g).gr_name},
-                {'db': 'passwd', 'id': access['uid'], 'len': 7, 'key': 'user',
-                 'name': lambda g: pwd.struct_passwd(g).pw_name},
-            ]
-
-            for target in targets:
-                getent = self._exec_command(
-                    'getent {db} {id}'.format(**target)).split(b':')
-                if len(getent) < target['len']:
-                    getent += [b''] * (target['len'] - len(getent))
-                access[target['key']] = \
-                    target['name'](getent).decode(self.locale or 'utf-8')
+        if self.platform in ("linux", "darwin", "freebsd"):
+            def entry_name(db, _id):
+                entry = self._exec_command('getent {} {}'.format(db, _id))
+                name = next(iter(entry.split(b':')))
+                return name.decode(self.locale or 'utf-8')
+            access['group'] = entry_name('group', access['gid'])
+            access['user'] = entry_name('passwd', access['uid'])
 
         return access
 
