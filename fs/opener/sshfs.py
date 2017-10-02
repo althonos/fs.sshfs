@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
-import configparser
+import six
 
 from .base import Opener
 from ..subfs import ClosingSubFS
@@ -34,7 +34,7 @@ class SSHOpener(Opener):
         ssh_host, _, ssh_port = ssh_host.partition(':')
         ssh_port = int(ssh_port) if ssh_port.isdigit() else 22
 
-        params = configparser.ConfigParser()
+        params = six.moves.configparser.ConfigParser()
         params.read_dict({'sshfs':getattr(parse_result, 'params', {})})
 
         ssh_fs = SSHFS(
