@@ -90,6 +90,8 @@ Use ``fs.open_fs`` to open a filesystem with an SSH
    import fs
    my_fs = fs.open_fs("ssh://[user[:password]@]host[:port]/[directory]")
 
+The following URL parameters are supported: ``timeout``, ``keepalive``.
+
 
 Constructor
 '''''''''''
@@ -130,6 +132,9 @@ with each argument explained below:
 
 Once created, the ``SSHFS`` filesystem behaves like any other filesystem
 (see the `Pyfilesystem2 documentation <https://pyfilesystem2.readthedocs.io>`_).
+
+Configuration
+-------------
 
 ``SSHFS`` are aware of `SSH config files <http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/>`_
 and as such, one of the hosts in the configuration file can be provided as the
