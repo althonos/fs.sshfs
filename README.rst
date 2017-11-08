@@ -16,7 +16,7 @@ fs.sshfs
    :target: https://pypi.python.org/pypi/fs.sshfs
 
 .. |Conda| image:: https://anaconda.org/conda-forge/fs.sshfs/badges/installer/conda.svg
-   :target: https://conda.anaconda.org/conda-forge
+   :target: https://anaconda.org/conda-forge/fs.sshfs
 
 .. |Format| image:: https://img.shields.io/pypi/format/fs.sshfs.svg?style=flat-square&maxAge=300
    :target: https://pypi.python.org/pypi/fs.sshfs
