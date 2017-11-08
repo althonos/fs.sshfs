@@ -1,7 +1,7 @@
 fs.sshfs
 ========
 
-|Source| |PyPI| |Travis| |Codecov| |Codacy| |Format| |License|
+|Source| |PyPI| |Conda| |Travis| |Codecov| |Codacy| |Format| |License|
 
 .. |Codacy| image:: https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg?style=flat-square&maxAge=300
    :target: https://www.codacy.com/app/althonos/fs.sshfs/dashboard
@@ -15,6 +15,9 @@ fs.sshfs
 .. |PyPI| image:: https://img.shields.io/pypi/v/fs.sshfs.svg?style=flat-square&maxAge=300
    :target: https://pypi.python.org/pypi/fs.sshfs
 
+.. |Conda| image:: https://anaconda.org/conda-forge/fs.sshfs/badges/installer/conda.svg
+   :target: https://conda.anaconda.org/conda-forge
+
 .. |Format| image:: https://img.shields.io/pypi/format/fs.sshfs.svg?style=flat-square&maxAge=300
    :target: https://pypi.python.org/pypi/fs.sshfs
 
@@ -26,6 +29,7 @@ fs.sshfs
 
 .. |Source| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=300&style=flat-square
    :target: https://github.com/althonos/fs.sshfs
+
 
 
 Requirements
