@@ -316,9 +316,9 @@ class SSHFS(FS):
             str: the guessed locale.
         """
         if self.platform in ("linux", "darwin", "freebsd"):
-            locale = self._exec_command('locale charmap')
+            locale = self._exec_command('echo $LANG')
             if locale is not None:
-                return locale.decode('ascii').lower()
+                return locale.split(b'.')[-1].decode('ascii').lower()
         return None
 
     def _make_info(self, name, stat_result, namespaces):
