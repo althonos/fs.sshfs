@@ -1,5 +1,5 @@
-fs.sshfs
-========
+``fs.sshfs``
+============
 
 |Source| |PyPI| |Conda| |Travis| |Codecov| |Codacy| |Format| |License|
 
