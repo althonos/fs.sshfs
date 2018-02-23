@@ -4,8 +4,11 @@ from __future__ import absolute_import
 
 import configparser
 
+import six
+
 from .base import Opener
 from ..subfs import ClosingSubFS
+from ..errors import FSError, CreateFailed
 
 __license__ = "LGPL-2.1+"
 __copyright__ = "Copyright (c) 2017 Martin Larralde"
@@ -50,7 +53,12 @@ class SSHOpener(Opener):
                 params.get('sshfs', 'config_path', fallback='~/.ssh/config')
         )
 
-        if dir_path: # pragma: no cover
-            return ssh_fs.opendir(dir_path, factory=ClosingSubFS)
-        else:
-            return ssh_fs
+        try:
+            if dir_path:
+                if create:
+                    ssh_fs.makedirs(dir_path, recreate=True)
+                return ssh_fs.opendir(dir_path, factory=ClosingSubFS)
+            else:
+                return ssh_fs
+        except FSError as err:
+            six.raise_from(CreateFailed(), err)

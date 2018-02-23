@@ -10,6 +10,7 @@ import tempfile
 import paramiko
 
 import fs.errors
+import fs.path
 from fs.sshfs import SSHFS
 
 from . import utils
@@ -26,7 +27,7 @@ class TestCreateFailed(unittest.TestCase):
             fs.errors.CreateFailed, SSHFS, 'localhost', 'baduser', timeout=1)
 
 
-class TestCreate(unittest.TestCase):
+class TestOpener(unittest.TestCase):
 
     user = "user"
     pasw = "pass"
@@ -136,3 +137,18 @@ class TestCreate(unittest.TestCase):
     def test_sshconfig_notfound(self):
         ssh_fs = SSHFS('localhost', self.user, self.pasw, port=self.port, config_path='zzzz')
         self.assertFunctional(ssh_fs)
+
+    def test_create(self):
+
+        d = fs.path.join("home", self.user, "test", "directory")
+        url = "ssh://{}:{}@localhost:{}/{}".format(self.user, self.pasw, self.port, d)
+
+        # Make sure
+        with self.assertRaises(fs.errors.CreateFailed):
+            ssh_fs = fs.open_fs(url)
+        with fs.open_fs(url, create=True) as ssh_fs:
+            ssh_fs.touch("foo")
+        with fs.open_fs(url) as ssh_fs:
+            self.assertTrue(ssh_fs.isfile("foo"))
+        with fs.open_fs(url) as ssh_fs:
+            self.assertTrue(ssh_fs.isfile("foo"))
