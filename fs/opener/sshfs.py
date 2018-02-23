@@ -60,5 +60,5 @@ class SSHOpener(Opener):
                 return ssh_fs.opendir(dir_path, factory=ClosingSubFS)
             else:
                 return ssh_fs
-        except FSError as err:
-            six.raise_from(CreateFailed(), err)
+        except Exception as err:
+            six.raise_from(CreateFailed, err)

@@ -140,15 +140,27 @@ class TestOpener(unittest.TestCase):
 
     def test_create(self):
 
-        d = fs.path.join("home", self.user, "test", "directory")
-        url = "ssh://{}:{}@localhost:{}/{}".format(self.user, self.pasw, self.port, d)
+        directory = fs.path.join("home", self.user, "test", "directory")
+        base = "ssh://{}:{}@localhost:{}".format(self.user, self.pasw, self.port)
+        url = "{}/{}".format(base, directory)
 
-        # Make sure
+        # Make sure unexisting directory raises `CreateFailed`
         with self.assertRaises(fs.errors.CreateFailed):
             ssh_fs = fs.open_fs(url)
+
+        # Open with `create` and try touching a file
         with fs.open_fs(url, create=True) as ssh_fs:
             ssh_fs.touch("foo")
+
+        # Open the base filesystem and check the subdirectory exists
+        with fs.open_fs(base) as ssh_fs:
+            self.assertTrue(ssh_fs.isdir(directory))
+            self.assertTrue(ssh_fs.isfile(fs.path.join(directory, "foo")))
+
+        # Open without `create` and check the file exists
         with fs.open_fs(url) as ssh_fs:
             self.assertTrue(ssh_fs.isfile("foo"))
-        with fs.open_fs(url) as ssh_fs:
+
+        # Open with create and check this does fail
+        with fs.open_fs(url, create=True) as ssh_fs:
             self.assertTrue(ssh_fs.isfile("foo"))
