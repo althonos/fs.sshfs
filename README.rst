@@ -162,7 +162,5 @@ See also
 * `fs <https://github.com/Pyfilesystem/pyfilesystem2>`_, the core pyfilesystem2 library
 * `fs.archive <https://github.com/althonos/fs.archive>`_, enhanced archive filesystems
   for pyfilesystem2
-* `fs.proxy <https://github.com/althonos/fs.proxy>`_, miscellaneous proxy filesystems
-  for pyfilesystem2
 * `fs.smbfs <https://github.com/althonos/fs.smbfs>`_, Pyfilesystem2 over SMB
   using pysmb
