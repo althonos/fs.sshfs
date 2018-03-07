@@ -179,6 +179,10 @@ class SSHFS(FS):
                 0 to disable completely, 1 to enable line based buffering, or
                 any larger positive integer for a custom buffer size).
 
+        Keyword Arguments:
+            pipelined (bool): Set the transfer in pipelined mode (should
+                improve transfer speed). Defaults to ``True``.
+
         Raises:
             fs.errors.FileExpected: if the path if not a file.
             fs.errors.FileExists: if the file already exists and
@@ -201,11 +205,13 @@ class SSHFS(FS):
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
             with convert_sshfs_errors('openbin', path):
-                return SSHFile(self._sftp.open(
+                handle = self._sftp.open(
                     _path,
                     mode=_mode.to_platform_bin(),
                     bufsize=buffering
-                ))
+                )
+                handle.set_pipelined(options.get("pipelined", True))
+                return SSHFile(handle)
 
     def remove(self, path):  # noqa: D102
         self.check()
