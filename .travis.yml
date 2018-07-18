@@ -5,27 +5,33 @@ cache: pip
 services:
 - docker
 
-python:
-- '2.7'
-- '3.3'
-- '3.4'
-- '3.5'
-- '3.6'
-- pypy
-- pypy-5.3.1
+matrix:
+  include:
+  - python: "2.7"
+    env: STLS=setuptools
+  - python: "3.3"
+    env: STLS=setuptools~=39.2
+  - python: "3.4"
+    env: STLS=setuptools
+  - python: "3.5"
+    env: STLS=setuptools
+  - python: "3.6"
+    env: STLS=setuptools
+  - python: pypy
+    env: STLS=setuptools
+  - python: pypy3.5
+    env: STLS=setuptools
+  allow_failures:
+  - python: pypy
+  - python: pypy3.5
 
 addons:
   ssh_known_hosts:
   - localhost
 
-matrix:
-  allow_failures:
-  - python: pypy
-  - python: pypy-5.3.1
-
 before_install:
 - docker pull sjourdan/alpine-sshd
-- pip install -U setuptools wheel
+- pip install -U $STLS wheel
 
 install:
 - pip install .[dev,test]
