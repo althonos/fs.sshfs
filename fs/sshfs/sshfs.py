@@ -56,7 +56,7 @@ class SSHFS(FS):
         'invalid_path_chars': '\0',
         'network': True,
         'read_only': False,
-        'thread_safe': True,
+        'thread_safe': False,
         'unicode_paths': True,
         'virtual': False,
     }
