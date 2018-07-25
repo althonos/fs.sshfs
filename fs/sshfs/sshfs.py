@@ -205,7 +205,8 @@ class SSHFS(FS):
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
             with convert_sshfs_errors('openbin', path):
-                handle = self._sftp.open(
+                _sftp = self._client.open_sftp()
+                handle = _sftp.open(
                     _path,
                     mode=_mode.to_platform_bin(),
                     bufsize=buffering
