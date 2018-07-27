@@ -9,8 +9,6 @@ matrix:
   include:
   - python: "2.7"
     env: STLS=setuptools
-  - python: "3.3"
-    env: STLS=setuptools~=39.2
   - python: "3.4"
     env: STLS=setuptools
   - python: "3.5"
