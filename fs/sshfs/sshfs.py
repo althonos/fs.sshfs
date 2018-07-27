@@ -8,6 +8,7 @@ import io
 import os
 import stat
 import socket
+import sys
 
 import six
 import paramiko
@@ -56,7 +57,8 @@ class SSHFS(FS):
         'invalid_path_chars': '\0',
         'network': True,
         'read_only': False,
-        'thread_safe': False,
+        'thread_safe': sys.version_info.major == 2 \
+                       or sys.version_info.minor not in (3, 4),
         'unicode_paths': True,
         'virtual': False,
     }
