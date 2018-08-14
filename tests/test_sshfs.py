@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import stat
+import sys
 import time
 import uuid
 import unittest
@@ -45,6 +46,38 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         self.test_folder = fs.path.join('/home', self.user, uuid.uuid4().hex)
         self.ssh_fs.makedir(self.test_folder, recreate=True)
         return self.ssh_fs.opendir(self.test_folder, factory=ClosingSubFS)
+
+    @unittest.skipIf(sys.version_info[:2] == (3, 4), 'hangs in Python 3.4')
+    def test_download_0(self):
+        super(TestSSHFS, self).test_download_0()
+
+    @unittest.skipIf(sys.version_info[:2] == (3, 4), 'hangs in Python 3.4')
+    def test_download_1(self):
+        super(TestSSHFS, self).test_download_1()
+
+    @unittest.skipIf(sys.version_info[:2] == (3, 4), 'hangs in Python 3.4')
+    def test_download_2(self):
+        super(TestSSHFS, self).test_download_2()
+
+    @unittest.skipIf(sys.version_info[:2] == (3, 4), 'hangs in Python 3.4')
+    def test_download_4(self):
+        super(TestSSHFS, self).test_download_4()
+
+    @unittest.skipIf(sys.version_info[:2] == (3, 4), 'hangs in Python 3.4')
+    def test_upload_0(self):
+        super(TestSSHFS, self).test_upload_0()
+
+    @unittest.skipIf(sys.version_info[:2] == (3, 4), 'hangs in Python 3.4')
+    def test_upload_1(self):
+        super(TestSSHFS, self).test_upload_1()
+
+    @unittest.skipIf(sys.version_info[:2] == (3, 4), 'hangs in Python 3.4')
+    def test_upload_2(self):
+        super(TestSSHFS, self).test_upload_2()
+
+    @unittest.skipIf(sys.version_info[:2] == (3, 4), 'hangs in Python 3.4')
+    def test_upload_4(self):
+        super(TestSSHFS, self).test_upload_4()
 
     def test_chmod(self):
         self.fs.touch("test.txt")
