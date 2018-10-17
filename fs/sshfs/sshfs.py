@@ -287,15 +287,18 @@ class SSHFS(FS):
             self._locale = self._guess_locale()
         return self._locale
 
-    def _exec_command(self, cmd):
+    def _exec_command(self, cmd, timeout=1):
         """Run a command on the remote SSH server.
 
         Returns:
             bytes: the output of the command, if it didn't fail
             None: if the error pipe of the command was not empty
         """
-        _, out, err = self._client.exec_command(cmd)
-        return out.read().strip() if not err.read().strip() else None
+        _, out, err = self._client.exec_command(cmd, timeout=timeout)
+        try:
+            return out.read().strip() if not err.read().strip() else None
+        except socket.timeout:
+            return None
 
     def _guess_platform(self):
         """Guess the platform of the remove server.
