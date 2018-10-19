@@ -4,7 +4,9 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from .sshfs import SSHFS
+from . import opener
+from ._sshfs import SSHFS
+
 
 __license__ = "LGPL-2.1+"
 __copyright__ = "Copyright (c) 2017 Martin Larralde"

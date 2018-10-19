@@ -6,7 +6,7 @@ from __future__ import absolute_import
 
 import io
 
-from ..iotools import RawWrapper
+from fs.iotools import RawWrapper
 
 
 class SSHFile(RawWrapper):
