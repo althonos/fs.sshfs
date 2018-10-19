@@ -11,9 +11,9 @@ import unittest
 import fs.path
 import fs.test
 import fs.errors
-from fs.sshfs import SSHFS
 from fs.subfs import ClosingSubFS
 from fs.permissions import Permissions
+from sshfs import SSHFS
 
 from . import utils
 

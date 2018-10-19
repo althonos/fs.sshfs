@@ -11,7 +11,7 @@ import paramiko
 
 import fs.errors
 import fs.path
-from fs.sshfs import SSHFS
+from sshfs import SSHFS
 
 from . import utils
 
