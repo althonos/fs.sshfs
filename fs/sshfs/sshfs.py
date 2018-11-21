@@ -12,6 +12,7 @@ import sys
 
 import six
 import paramiko
+from cached_property import threaded_cached_property as cached_property
 
 from .. import errors
 from ..base import FS
@@ -77,7 +78,6 @@ class SSHFS(FS):
             pass
         return ssh_config
 
-
     def __init__(self, host, user=None, passwd=None, pkey=None, timeout=10,
                  port=22, keepalive=10, compress=False,
                  config_path='~/.ssh/config'):  # noqa: D102
@@ -94,7 +94,6 @@ class SSHFS(FS):
         self._host = host = config.get('hostname')
         self._port = port = int(config.get('port', port))
         self._client = client = paramiko.SSHClient()
-        self._locale = None
 
         try:
 
@@ -111,7 +110,6 @@ class SSHFS(FS):
             if keepalive > 0:
                 client.get_transport().set_keepalive(keepalive)
             self._sftp = client.open_sftp()
-            self._platform = None
 
         except (paramiko.ssh_exception.SSHException,            # protocol errors
                 paramiko.ssh_exception.NoValidConnectionsError, # connexion errors
@@ -267,43 +265,12 @@ class SSHFS(FS):
             if 'permissions' in access:
                 self._chmod(path, access['permissions'].mode)
 
-    @property
+    @cached_property
     def platform(self):
         """The platform the server is running on.
 
         Returns:
-            fs.sshfs.enums.Platform: the platform of the remote server.
-        """
-        if self._platform is None:
-            self._platform = self._guess_platform()
-        return self._platform
-
-    @property
-    def locale(self):
-        """The locale the server is running on.
-
-        Returns:
-            str: the locale of the remote server.
-        """
-        if self._locale is None:
-            self._locale = self._guess_locale()
-        return self._locale
-
-    def _exec_command(self, cmd):
-        """Run a command on the remote SSH server.
-
-        Returns:
-            bytes: the output of the command, if it didn't fail
-            None: if the error pipe of the command was not empty
-        """
-        _, out, err = self._client.exec_command(cmd)
-        return out.read().strip() if not err.read().strip() else None
-
-    def _guess_platform(self):
-        """Guess the platform of the remove server.
-
-        Returns:
-            fs.sshfs.enums.Platform: the guessed platform.
+            str: the platform of the remote server, as in `sys.platform`.
         """
         uname_sys = self._exec_command("uname -s")
         sysinfo = self._exec_command("sysinfo")
@@ -320,17 +287,28 @@ class SSHFS(FS):
             return "win32"
         return "unknown"
 
-    def _guess_locale(self):
-        """Guess the locale of the remote server.
+    @cached_property
+    def locale(self):
+        """The locale the server is running on.
 
         Returns:
-            str: the guessed locale.
+            str: the locale of the remote server if detected, or `None`.
         """
         if self.platform in ("linux", "darwin", "freebsd"):
             locale = self._exec_command('echo $LANG')
             if locale is not None:
                 return locale.split(b'.')[-1].decode('ascii').lower()
         return None
+
+    def _exec_command(self, cmd):
+        """Run a command on the remote SSH server.
+
+        Returns:
+            bytes: the output of the command, if it didn't fail
+            None: if the error pipe of the command was not empty
+        """
+        _, out, err = self._client.exec_command(cmd)
+        return out.read().strip() if not err.read().strip() else None
 
     def _make_info(self, name, stat_result, namespaces):
         """Create an `Info` object from a stat result.
