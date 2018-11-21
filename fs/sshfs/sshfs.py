@@ -57,8 +57,7 @@ class SSHFS(FS):
         'invalid_path_chars': '\0',
         'network': True,
         'read_only': False,
-        'thread_safe': sys.version_info.major == 2 \
-                       or sys.version_info.minor not in (3, 4),
+        'thread_safe': sys.version_info[:2] > (3, 4),
         'unicode_paths': True,
         'virtual': False,
     }
@@ -200,8 +199,11 @@ class SSHFS(FS):
         _mode.validate_bin()
 
         with self._lock:
-            if _mode.exclusive and self.exists(_path):
-                raise errors.FileExists(path)
+            if _mode.exclusive:
+                if self.exists(_path):
+                    raise errors.FileExists(path)
+                else:
+                    _mode = Mode(''.join(set(mode.replace('x', 'w'))))
             elif _mode.reading and not _mode.create and not self.exists(_path):
                 raise errors.ResourceNotFound(path)
             elif self.isdir(_path):
