@@ -94,6 +94,7 @@ class SSHFS(FS):
         self._host = host = config.get('hostname')
         self._port = port = int(config.get('port', port))
         self._client = client = paramiko.SSHClient()
+        self._timeout = timeout
 
         try:
 
@@ -307,7 +308,7 @@ class SSHFS(FS):
             bytes: the output of the command, if it didn't fail
             None: if the error pipe of the command was not empty
         """
-        _, out, err = self._client.exec_command(cmd)
+        _, out, err = self._client.exec_command(cmd, timeout=self._timeout)
         return out.read().strip() if not err.read().strip() else None
 
     def _make_info(self, name, stat_result, namespaces):
