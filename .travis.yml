@@ -12,10 +12,10 @@ matrix:
   - python: 3.5
   - python: 3.6
   - python: 3.7
-  - python: pypy
+  #- python: pypy
   - python: pypy3.5
   allow_failures:
-  - python: pypy
+  #- python: pypy
   - python: pypy3.5
 
 addons:
@@ -30,7 +30,7 @@ install:
 - pip install .[dev,test]
 
 script:
-- green
+- green -T
 
 after_script:
 - codecov
