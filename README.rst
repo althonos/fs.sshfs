@@ -134,8 +134,10 @@ with each argument explained below:
 ``config_path``
   the path to an OpenSSH configuration file.
 
-Once created, the ``SSHFS`` filesystem behaves like any other filesystem
-(see the `Pyfilesystem2 documentation <https://pyfilesystem2.readthedocs.io>`_).
+Additional keyword arguments will be passed to the underlying connection call,
+taking precedence over implicitly derived arguments.  Once created, the
+``SSHFS`` filesystem behaves like any other filesystem (see the `Pyfilesystem2
+documentation <https://pyfilesystem2.readthedocs.io>`_).
 
 Configuration
 -------------
