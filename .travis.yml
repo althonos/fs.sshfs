@@ -1,6 +1,7 @@
 sudo: false
 language: python
 cache: pip
+dist: xenial
 
 services:
 - docker
@@ -10,6 +11,7 @@ matrix:
   - python: 2.7
   - python: 3.5
   - python: 3.6
+  - python: 3.7
   - python: pypy
   - python: pypy3.5
   allow_failures:
