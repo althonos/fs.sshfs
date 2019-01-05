@@ -7,6 +7,7 @@ import time
 import collections
 
 import fs
+import semantic_version
 
 try:
     import docker
@@ -21,16 +22,7 @@ except ImportError:
 
 
 def fs_version():
-    version_info = collections.namedtuple(
-        'version_info', 'major minor micro releaselevel serial'
-    )
-    match = re.match(r'v?(\d+)\.(\d+)\.(\d+)(\D+)?(\d+)?', fs.__version__)
-    major = int(match.group(1))
-    minor = int(match.group(2))
-    micro = int(match.group(3))
-    level = match.group(4)
-    serial = None if match.group(5) is None else int(match.group(5))
-    return version_info(major, minor, micro, level, serial)
+    return semantic_version.Version(fs.__version__)
 
 
 def startServer(docker_client, user, pasw, port):

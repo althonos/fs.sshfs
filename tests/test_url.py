@@ -3,12 +3,14 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import unittest
+
 import fs
+from semantic_version import Version
 
 from . import utils
 
 
-@unittest.skipIf(utils.fs_version() < (2,0,10), "FS URL params not supported.")
+@unittest.skipIf(utils.fs_version() < Version("2.0.10"), "FS URL params not supported.")
 class TestFSURL(unittest.TestCase):
 
     user = "user"

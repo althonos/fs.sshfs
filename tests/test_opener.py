@@ -76,7 +76,7 @@ class TestOpener(unittest.TestCase):
         with ssh_fs.opendir(test_folder) as test_fs:
 
             test_fs.makedirs('foo/bär/baz')
-            test_fs.settext('foo/test.txt', 'this is a test.')
+            test_fs.writetext('foo/test.txt', 'this is a test.')
 
             self.assertFalse(test_fs.getinfo('foo/test.txt').is_dir)
             self.assertTrue(test_fs.getinfo('foo/bär').is_dir)
@@ -86,7 +86,7 @@ class TestOpener(unittest.TestCase):
             test_fs.move('foo/test.txt', 'foo/bär/test.txt')
             self.assertFalse(test_fs.exists('foo/test.txt'))
             self.assertTrue(test_fs.exists('foo/bär/test.txt'))
-            self.assertEqual(test_fs.gettext('foo/bär/test.txt'), 'this is a test.')
+            self.assertEqual(test_fs.readtext('foo/bär/test.txt'), 'this is a test.')
 
             self.assertRaises(fs.errors.DirectoryNotEmpty, test_fs.removedir, 'foo/bär')
             test_fs.removedir('foo/bär/baz')
