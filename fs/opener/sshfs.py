@@ -12,7 +12,7 @@ from ..subfs import ClosingSubFS
 from ..errors import FSError, CreateFailed
 
 __license__ = "LGPL-2.1+"
-__copyright__ = "Copyright (c) 2017 Martin Larralde"
+__copyright__ = "Copyright (c) 2017-2019 Martin Larralde"
 __author__ = "Martin Larralde <martin.larralde@ens-cachan.fr>"
 __version__ = 'dev'
 
