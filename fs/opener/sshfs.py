@@ -7,6 +7,7 @@ import configparser
 import six
 
 from .base import Opener
+from .registry import registry
 from ..subfs import ClosingSubFS
 from ..errors import FSError, CreateFailed
 
@@ -62,3 +63,6 @@ class SSHOpener(Opener):
                 return ssh_fs
         except Exception as err:
             six.raise_from(CreateFailed, err)
+
+
+registry.install(SSHOpener)
