@@ -80,7 +80,7 @@ class SSHFS(FS):
 
     def __init__(self, host, user=None, passwd=None, pkey=None, timeout=10,
                  port=22, keepalive=10, compress=False,
-                 config_path='~/.ssh/config'):  # noqa: D102
+                 config_path='~/.ssh/config', **kwargs):  # noqa: D102
         super(SSHFS, self).__init__()
 
         # Attempt to get a configuration for the given host
@@ -97,15 +97,22 @@ class SSHFS(FS):
         self._timeout = timeout
 
         try:
-
             # TODO: add more options
             client.load_system_host_keys()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            argdict = {
+                "pkey": pkey,
+                "key_filename": keyfile,
+                "look_for_keys": True if (pkey and keyfile) is None else False,
+                "compress": compress,
+                "timeout": timeout
+            }
+
+            argdict.update(kwargs)
+
             client.connect(
                 socket.gethostbyname(host), port, user, passwd,
-                pkey=pkey, key_filename=keyfile,
-                look_for_keys=True if (pkey and keyfile) is None else False,
-                compress=compress, timeout=timeout
+                **argdict
             )
 
             if keepalive > 0:
