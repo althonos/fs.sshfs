@@ -25,9 +25,10 @@ addons:
 before_install:
 - docker pull sjourdan/alpine-sshd
 - pip install -U setuptools wheel
+-
 
 install:
-- pip install .[dev,test]
+- pip install .[dev,tests]
 
 script:
 - green -T
