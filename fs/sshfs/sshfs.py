@@ -205,10 +205,11 @@ class SSHFS(FS):
         _mode.validate_bin()
 
         with self._lock:
-            if _mode.exclusive and self.exists(_path):
-                raise errors.FileExists(path)
-                # else:
-                #     _mode = Mode(''.join(set(mode.replace('x', 'w'))))
+            if _mode.exclusive:
+                if self.exists(_path):
+                    raise errors.FileExists(path)
+                else:
+                    _mode = Mode(''.join(set(mode.replace('x', 'w'))))
             elif not _mode.create and not self.exists(_path):
                 raise errors.ResourceNotFound(path)
             elif self.isdir(_path):

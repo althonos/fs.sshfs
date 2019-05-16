@@ -94,7 +94,7 @@ Use ``fs.open_fs`` to open a filesystem with an SSH
    import fs
    my_fs = fs.open_fs("ssh://[user[:password]@]host[:port]/[directory]")
 
-The following URL parameters are supported: ``timeout``, ``keepalive``.
+VThe following URL parameters are supported: ``timeout``, ``keepalive``.
 
 
 Constructor
@@ -139,6 +139,22 @@ taking precedence over implicitly derived arguments.  Once created, the
 ``SSHFS`` filesystem behaves like any other filesystem (see the `Pyfilesystem2
 documentation <https://pyfilesystem2.readthedocs.io>`_).
 
+
+Files
+'''''
+
+`SSHFS.openbin` has the following extra options that can be passed as keyword arguments
+to control the file buffering:
+
+``prefetch``
+  enabled by default, use a background thread to prefetch the content of a file 
+  opened in reading mode. Does nothing for files in writing mode.
+``pipelined``
+  enable pipelined mode, avoid waiting for server answer between two uploaded 
+  chunks. Does nothing for files in reading mode.
+
+
+
 Configuration
 -------------
 
@@ -146,6 +162,7 @@ Configuration
 and as such, one of the hosts in the configuration file can be provided as the
 ``host`` argument for the filesystem to connect to the server with the proper
 configuration values.
+
 
 
 Feedback
@@ -156,6 +173,7 @@ Found a bug ? Have an enhancement request ? Head over to the
 project if you need to report or ask something. If you are filling in on a bug,
 please include as much information as you can about the issue, and try to
 recreate the same bug in a simple, easily reproductible situation.
+
 
 
 See also
