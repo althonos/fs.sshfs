@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
-import io
 import os
 import stat
 import socket
@@ -18,7 +17,6 @@ from .. import errors
 from ..base import FS
 from ..info import Info
 from ..enums import ResourceType
-from ..iotools import RawWrapper
 from ..path import basename
 from ..permissions import Permissions
 from ..osfs import OSFS
@@ -51,7 +49,6 @@ class SSHFS(FS):
             source exception is stored as the ``exc`` attribute of the
             ``CreateFailed`` error.
     """
-
 
     _meta = {
         'case_insensitive': False,
@@ -88,7 +85,7 @@ class SSHFS(FS):
         config = ssh_config.lookup(host)
         pkey = config.get('identityfile') or pkey
         # Extract the given info
-        pkey, keyfile= (pkey, None) \
+        pkey, keyfile = (pkey, None) \
             if isinstance(pkey, paramiko.PKey) else (None, pkey)
         self._user = user = user or config.get('user')
         self._host = host = config.get('hostname')
@@ -120,7 +117,7 @@ class SSHFS(FS):
             self._sftp = client.open_sftp()
 
         except (paramiko.ssh_exception.SSHException,            # protocol errors
-                paramiko.ssh_exception.NoValidConnectionsError, # connexion errors
+                paramiko.ssh_exception.NoValidConnectionsError,  # connexion errors
                 socket.gaierror, socket.timeout) as e:          # TCP errors
 
             message = "Unable to create filesystem: {}".format(e)
@@ -180,8 +177,8 @@ class SSHFS(FS):
         Arguments:
             path (str): A path on the filesystem.
             mode (str): Mode to open the file (must be a valid, non-text mode).
-                Since this method only opens binary files, the ``b`` in the mode
-                is implied.
+                Since this method only opens binary files, the ``b`` in the
+                mode is implied.
             buffering (int): the buffering policy (-1 to use default buffering,
                 0 to disable completely, 1 to enable line based buffering, or
                 any larger positive integer for a custom buffer size).
@@ -189,6 +186,9 @@ class SSHFS(FS):
         Keyword Arguments:
             pipelined (bool): Set the transfer in pipelined mode (should
                 improve transfer speed). Defaults to ``True``.
+            prefetch (bool): Use background threading to prefetch the file
+                content when opened in reading mode. Disable in case of
+                threading issues. Defaults to ``True``.
 
         Raises:
             fs.errors.FileExpected: if the path if not a file.
@@ -205,12 +205,11 @@ class SSHFS(FS):
         _mode.validate_bin()
 
         with self._lock:
-            if _mode.exclusive:
-                if self.exists(_path):
-                    raise errors.FileExists(path)
-                else:
-                    _mode = Mode(''.join(set(mode.replace('x', 'w'))))
-            elif _mode.reading and not _mode.create and not self.exists(_path):
+            if _mode.exclusive and self.exists(_path):
+                raise errors.FileExists(path)
+                # else:
+                #     _mode = Mode(''.join(set(mode.replace('x', 'w'))))
+            elif not _mode.create and not self.exists(_path):
                 raise errors.ResourceNotFound(path)
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
@@ -222,6 +221,9 @@ class SSHFS(FS):
                     bufsize=buffering
                 )
                 handle.set_pipelined(options.get("pipelined", True))
+                if options.get("prefetch", True):
+                    if _mode.reading and not _mode.writing:
+                        handle.prefetch(self.getsize(_path))
                 return SSHFile(handle)
 
     def remove(self, path):  # noqa: D102
@@ -244,12 +246,12 @@ class SSHFS(FS):
         # NB: this will raise ResourceNotFound
         # and DirectoryExpected as expected by
         # the specifications
-        if not self.isempty(path):
+        if not self.isempty(_path):
             raise errors.DirectoryNotEmpty(path)
 
         with convert_sshfs_errors('removedir', path):
             with self._lock:
-                self._sftp.rmdir(path)
+                self._sftp.rmdir(_path)
 
     def setinfo(self, path, info):  # noqa: D102
         self.check()
@@ -263,15 +265,15 @@ class SSHFS(FS):
 
         with convert_sshfs_errors('setinfo', path):
             if 'accessed' in details or 'modified' in details:
-                self._utime(path,
+                self._utime(_path,
                             details.get("modified"),
                             details.get("accessed"))
             if 'uid' in access or 'gid' in access:
-                self._chown(path,
+                self._chown(_path,
                             access.get('uid'),
                             access.get('gid'))
             if 'permissions' in access:
-                self._chmod(path, access['permissions'].mode)
+                self._chmod(_path, access['permissions'].mode)
 
     @cached_property
     def platform(self):
@@ -350,7 +352,7 @@ class SSHFS(FS):
         }
 
         details['created'] = getattr(stat_result, 'st_birthtime', None)
-        ctime_key = 'created' if self.platform=="win32" else 'metadata_changed'
+        ctime_key = 'created' if self.platform == "win32" else 'metadata_changed'
         details[ctime_key] = getattr(stat_result, 'st_ctime', None)
         return details
 
