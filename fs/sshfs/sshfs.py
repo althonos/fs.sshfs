@@ -11,7 +11,7 @@ import sys
 
 import six
 import paramiko
-from cached_property import threaded_cached_property as cached_property
+from property_cached import threaded_cached_property as cached_property
 
 from .. import errors
 from ..base import FS
