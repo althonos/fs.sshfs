@@ -54,7 +54,7 @@ Requirements
 .. |PyPI six| image:: https://img.shields.io/pypi/v/six.svg?maxAge=300&style=flat-square
    :target: https://pypi.python.org/pypi/six
 
-.. |License fs| image:: https://img.shields.io/badge/license-MIT-blue.svg?maxAge=300&style=flat-square
+.. |License fs| image:: https://img.shields.io/pypi/l/fs.svg?maxAge=300&style=flat-square
    :target: https://choosealicense.com/licenses/mit/
 
 .. |Source fs| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=300&style=flat-square

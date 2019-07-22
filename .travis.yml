@@ -46,7 +46,7 @@ deploy:
   on:
     tags: true
     repo: althonos/fs.sshfs
-    python: 3.6
+    python: 3.7
   distributions: sdist bdist_wheel
   server: https://upload.pypi.org/legacy/
   skip_upload_docs: true
