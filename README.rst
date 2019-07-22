@@ -35,14 +35,15 @@
 Requirements
 ------------
 
-+-------------------+-----------------+-------------------+--------------------+
-| **pyfilesystem2** | |PyPI fs|       | |Source fs|       | |License fs|       |
-+-------------------+-----------------+-------------------+--------------------+
-| **six**           | |PyPI six|      | |Source six|      | |License six|      |
-+-------------------+-----------------+-------------------+--------------------+
-| **paramiko**      | |PyPI paramiko| | |Source paramiko| | |License paramiko| |
-+-------------------+-----------------+-------------------+--------------------+
-
++---------------------+-----------------+-------------------+--------------------+
+| **pyfilesystem2**   | |PyPI fs|       | |Source fs|       | |License fs|       |
++---------------------+-----------------+-------------------+--------------------+
+| **six**             | |PyPI six|      | |Source six|      | |License six|      |
++---------------------+-----------------+-------------------+--------------------+
+| **paramiko**        | |PyPI paramiko| | |Source paramiko| | |License paramiko| |
++---------------------+-----------------+-------------------+--------------------+
+| **property-cached** | |PyPI property| | |Source property| | |License property| |
++---------------------+-----------------+-------------------+--------------------+
 
 .. |License six| image:: https://img.shields.io/pypi/l/six.svg?maxAge=300&style=flat-square
    :target: https://choosealicense.com/licenses/mit/
@@ -70,6 +71,15 @@ Requirements
 
 .. |PyPI paramiko| image:: https://img.shields.io/pypi/v/paramiko.svg?maxAge=300&style=flat-square
    :target: https://pypi.python.org/pypi/paramiko
+
+.. |License property| image:: https://img.shields.io/pypi/l/property-cached.svg?maxAge=300&style=flat-square
+   :target: https://choosealicense.com/licenses/bsd-3-clause/
+
+.. |Source property| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=300&style=flat-square
+   :target: https://github.com/althonos/property-cached
+
+.. |PyPI property| image:: https://img.shields.io/pypi/v/property-cached.svg?maxAge=300&style=flat-square
+   :target: https://pypi.python.org/pypi/property-cached
 
 
 Installation
