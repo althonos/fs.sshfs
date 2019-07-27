@@ -104,7 +104,7 @@ Use ``fs.open_fs`` to open a filesystem with an SSH
    import fs
    my_fs = fs.open_fs("ssh://[user[:password]@]host[:port]/[directory]")
 
-VThe following URL parameters are supported: ``timeout``, ``keepalive``.
+The following URL parameters are supported: ``timeout``, ``keepalive``.
 
 
 Constructor
