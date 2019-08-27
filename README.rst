@@ -104,7 +104,9 @@ Use ``fs.open_fs`` to open a filesystem with an SSH
    import fs
    my_fs = fs.open_fs("ssh://[user[:password]@]host[:port]/[directory]")
 
-The following URL parameters are supported: ``timeout``, ``keepalive``.
+The ``sftp`` scheme can be used as an alias for the ``ssh`` scheme in
+the FS URL. The following URL parameters are supported: ``timeout``, 
+``keepalive``.
 
 
 Constructor
