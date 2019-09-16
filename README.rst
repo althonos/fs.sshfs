@@ -119,7 +119,7 @@ For a more granular way of connecting to an SSH server, use the
 
     from fs.sshfs import SSHFS
     my_fs = SSHFS(
-      host, user=None, paswd=None, pkey=None, timeout=10, port=22,
+      host, user=None, passwd=None, pkey=None, timeout=10, port=22,
       keepalive=10, compress=False, config_path='~/.ssh/config'
     )
 
