@@ -17,7 +17,7 @@ from .. import errors
 from ..base import FS
 from ..info import Info
 from ..enums import ResourceType
-from ..path import basename
+from ..path import basename, dirname
 from ..permissions import Permissions
 from ..osfs import OSFS
 from ..mode import Mode
@@ -55,6 +55,7 @@ class SSHFS(FS):
         'invalid_path_chars': '\0',
         'network': True,
         'read_only': False,
+        'supports_rename': True,
         'thread_safe': sys.version_info[:2] > (3, 4),
         'unicode_paths': True,
         'virtual': False,
@@ -170,6 +171,30 @@ class SSHFS(FS):
                 six.raise_from(errors.DirectoryExists(path), None)
 
         return self.opendir(path)
+
+    def move(self, src_path, dst_path, overwrite=False):
+        self.check()
+        _src_path = self.validatepath(src_path)
+        _dst_path = self.validatepath(dst_path)
+
+        with self._lock:
+            # check src exists and is a file
+            src_info = self.getinfo(_src_path)
+            if src_info.is_dir:
+                raise errors.FileExpected(src_path)
+            # check dst is not a dir and can be created
+            if self.isdir(_dst_path):
+                raise errors.FileExpected(dst_path)
+            if not self.isdir(dirname(_dst_path)):
+                raise errors.ResourceNotFound(dirname(dst_path))
+            # check dst does not exist or remove it
+            if self.isfile(_dst_path):
+                if not overwrite:
+                    raise errors.DestinationExists(dst_path)
+                with convert_sshfs_errors('remove', dst_path):
+                    self._sftp.remove(_dst_path)
+            # rename the file through SFTP's 'RENAME'
+            self._sftp.rename(_src_path, _dst_path)
 
     def openbin(self, path, mode='r', buffering=-1, **options):  # noqa: D102
         """Open a binary file-like object.
