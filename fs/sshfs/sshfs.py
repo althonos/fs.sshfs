@@ -308,8 +308,11 @@ class SSHFS(FS):
         Returns:
             str: the platform of the remote server, as in `sys.platform`.
         """
-        uname_sys = self._exec_command("uname -s")
-        sysinfo = self._exec_command("sysinfo")
+        try:
+            uname_sys = self._exec_command("uname -s")
+            sysinfo = self._exec_command("sysinfo")
+        except paramiko.ssh_exception.SSHException:
+            return "unknown"
         if uname_sys is not None:
             if uname_sys == b"FreeBSD":
                 return "freebsd"
