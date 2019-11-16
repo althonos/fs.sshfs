@@ -8,6 +8,8 @@ import time
 import uuid
 import unittest
 
+import paramiko.ssh_exception
+
 import fs.path
 import fs.test
 import fs.errors
@@ -128,6 +130,16 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
 
             self.fs.setinfo("test.txt", {'access': {'uid': 1001, 'gid':1002}})
             chown.assert_called_with(remote_path, 1001, 1002)
+
+    def test_exec_command_exception(self):
+        with utils.mock.patch.object(
+            self.fs.delegate_fs(),
+            '_exec_command',
+            side_effect=paramiko.ssh_exception.SSHException()
+        ) as _exec_command:
+            self.assertEquals(self.fs.delegate_fs().platform, "unknown")
+            if sys.version_info[:2] != (3,5):
+                _exec_command.assert_called()
 
     def test_utime(self):
 
