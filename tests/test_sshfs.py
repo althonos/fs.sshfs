@@ -138,7 +138,8 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
             side_effect=paramiko.ssh_exception.SSHException()
         ) as _exec_command:
             self.assertEquals(self.fs.delegate_fs().platform, "unknown")
-            _exec_command.assert_called()
+            if sys.version_info[:2] != (3,5):
+                _exec_command.assert_called()
 
     def test_utime(self):
 
