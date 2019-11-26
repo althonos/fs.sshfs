@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 from __future__ import absolute_import
 
+import itertools
 import os
 import stat
 import socket
@@ -154,6 +155,29 @@ class SSHFS(FS):
 
         with convert_sshfs_errors('listdir', path):
             return self._sftp.listdir(_path)
+
+    def scandir(self, path, namespaces=None, page=None):  # noqa: D102
+        self.check()
+        _path = self.validatepath(path)
+        _namespaces = namespaces or ()
+        start, stop = page or (None, None)
+        try:
+            with convert_sshfs_errors('scandir', path, directory=True):
+                stat_iter = self._sftp.listdir_iter(_path)
+                page_iter = itertools.islice(stat_iter, start, stop)
+                # We need to list() the page_iter here because the listdir_iter
+                # generator is unsafe for concurrent use across multiple calls,
+                # which can happen during a search="depth" walk.
+                for _stat in list(page_iter):
+                    yield self._make_info(_stat.filename, _stat, _namespaces)
+        except errors.ResourceNotFound:
+            # When given a bad path to listdir, the sftp client raises IOError
+            # with an errno of ENOENT no matter if the path was missing or was
+            # the wrong type (e.g., a file).  For the fs API, we need to figure
+            # out if it was supposed to be ENOTDIR instead of ENOENT.
+            if self.isfile(_path):
+                six.raise_from(errors.DirectoryExpected(path), None)
+            raise
 
     def makedir(self, path, permissions=None, recreate=False):  # noqa: D102
         self.check()
