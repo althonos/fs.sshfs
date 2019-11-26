@@ -163,12 +163,11 @@ class SSHFS(FS):
         start, stop = page or (None, None)
         try:
             with convert_sshfs_errors('scandir', path, directory=True):
-                stat_iter = self._sftp.listdir_iter(_path)
-                page_iter = itertools.islice(stat_iter, start, stop)
-                # We need to list() the page_iter here because the listdir_iter
-                # generator is unsafe for concurrent use across multiple calls,
-                # which can happen during a search="depth" walk.
-                for _stat in list(page_iter):
+                # We can't use listdir_iter here because it doesn't support
+                # concurrent iteration over multiple directories, which can
+                # happen during a search="depth" walk.
+                listing = self._sftp.listdir_attr(_path)
+                for _stat in itertools.islice(listing, start, stop):
                     yield self._make_info(_stat.filename, _stat, _namespaces)
         except errors.ResourceNotFound:
             # When given a bad path to listdir, the sftp client raises IOError
