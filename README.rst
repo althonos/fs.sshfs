@@ -1,5 +1,8 @@
-``fs.sshfs``
-============
+``fs.sshfs`` |star me|
+======================
+
+.. |star me| image:: https://img.shields.io/github/stars/althonos/fs.sshfs.svg?style=social&maxAge=3600&label=Star
+   :target: https://github.com/althonos/fs.sshfs/stargazers
 
 |Source| |PyPI| |Conda| |Travis| |Codecov| |Codacy| |Format| |License|
 
