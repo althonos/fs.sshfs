@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 from .sshfs import SSHFS
 
 __license__ = "LGPL-2.1+"
-__copyright__ = "Copyright (c) 2017-2019 Martin Larralde"
+__copyright__ = "Copyright (c) 2017-2021 Martin Larralde"
 __author__ = "Martin Larralde <martin.larralde@ens-paris-saclay.fr>"
 __version__ = 'dev'
 
