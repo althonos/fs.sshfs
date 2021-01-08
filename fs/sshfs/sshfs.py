@@ -55,6 +55,9 @@ class SSHFS(FS):
             to the default OpenSSH client configuration file.
         exec_timeout (int): The timeout to use when executing arbitrary
             commands on the SSH server. Defaults to the value of ``timeout``.
+        policy (paramiko.MissingHostKeyPolicy): The policy to use to resolve
+            missing host keys. Defaults to ``None``, which will create a
+            `paramiko.AutoAddPolicy` instance.
 
     Raises:
         fs.errors.CreateFailed: when the filesystem could not be created. The
@@ -100,6 +103,7 @@ class SSHFS(FS):
             compress=False,
             config_path='~/.ssh/config',
             exec_timeout=None,
+            policy=None,
             **kwargs
     ):  # noqa: D102
         super(SSHFS, self).__init__()
@@ -118,10 +122,12 @@ class SSHFS(FS):
         self._timeout = timeout
         self._exec_timeout = timeout if exec_timeout is None else exec_timeout
 
+        _policy = paramiko.AutoAddPolicy() if policy is None else policy
+
         try:
             # TODO: add more options
             client.load_system_host_keys()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.set_missing_host_key_policy(_policy)
             argdict = {
                 "pkey": pkey,
                 "key_filename": keyfile,
