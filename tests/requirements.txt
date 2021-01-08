@@ -1,4 +1,3 @@
-green
-codecov
-docker
-semantic-version
+codecov ~=2.1
+docker ~=4.4
+semantic-version ~=2.6
