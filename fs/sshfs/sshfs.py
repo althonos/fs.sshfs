@@ -146,13 +146,20 @@ class SSHFS(FS):
             _stat = self._sftp.stat(_path)
             info = self._make_raw_info(basename(_path), _stat, namespaces)
 
-            if "lstat" in namespaces:
+            if "lstat" in namespaces or "link" in namespaces:
                 _lstat = self._sftp.lstat(_path)
+            if "lstat" in namespaces:
                 info["lstat"] = {
                     k: getattr(_lstat, k)
                     for k in dir(_lstat)
                     if k.startswith("st_")
                 }
+            if "link" in namespaces:
+                if OSFS._get_type_from_stat(_lstat) == ResourceType.symlink:
+                    target = self._sftp.readlink(_path)
+                    info["link"] = {"target": target}
+                else:
+                    info["link"] = {"target": None}
 
             return Info(info)
 
@@ -162,6 +169,9 @@ class SSHFS(FS):
             raise errors.NoURL(path, purpose)
         return "ssh://{}@{}:{}{}".format(
             self._user, self._host, self._port, _path)
+
+    def islink(self, path):  # noqa: D102
+        return self.getinfo(path, namespaces=["link"]).is_link
 
     def listdir(self, path):  # noqa: D102
         self.check()
