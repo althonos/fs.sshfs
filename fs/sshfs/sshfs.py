@@ -143,8 +143,18 @@ class SSHFS(FS):
         _path = self.validatepath(path)
 
         with convert_sshfs_errors('getinfo', path):
-            _stat = self._sftp.lstat(_path)
-            return self._make_info(basename(_path), _stat, namespaces)
+            _stat = self._sftp.stat(_path)
+            info = self._make_raw_info(basename(_path), _stat, namespaces)
+
+            if "lstat" in namespaces:
+                _lstat = self._sftp.lstat(_path)
+                info["lstat"] = {
+                    k: getattr(_lstat, k)
+                    for k in dir(_lstat)
+                    if k.startswith("st_")
+                }
+
+            return Info(info)
 
     def geturl(self, path, purpose='download'):  # noqa: D102
         _path = self.validatepath(path)
@@ -176,7 +186,7 @@ class SSHFS(FS):
                 # happen during a search="depth" walk.
                 listing = self._sftp.listdir_attr(_path)
                 for _stat in itertools.islice(listing, start, stop):
-                    yield self._make_info(_stat.filename, _stat, _namespaces)
+                    yield Info(self._make_raw_info(_stat.filename, _stat, _namespaces))
         except errors.ResourceNotFound:
             # When given a bad path to listdir, the sftp client raises IOError
             # with an errno of ENOENT no matter if the path was missing or was
@@ -380,7 +390,7 @@ class SSHFS(FS):
         _, out, err = self._client.exec_command(cmd, timeout=self._timeout)
         return out.read().strip() if not err.read().strip() else None
 
-    def _make_info(self, name, stat_result, namespaces):
+    def _make_raw_info(self, name, stat_result, namespaces):
         """Create an `Info` object from a stat result.
         """
         info = {
@@ -398,7 +408,7 @@ class SSHFS(FS):
             }
         if 'access' in namespaces:
             info['access'] = self._make_access_from_stat(stat_result)
-        return Info(info)
+        return info
 
     def _make_details_from_stat(self, stat_result):
         """Make a *details* dictionnary from a stat result.
