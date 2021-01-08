@@ -53,6 +53,8 @@ class SSHFS(FS):
         config_path (str): The path to a SSH configuration file to use while
             establishing connection. Defaults to ``~/.ssh/config``, the path
             to the default OpenSSH client configuration file.
+        exec_timeout (int): The timeout to use when executing arbitrary
+            commands on the SSH server. Defaults to the value of ``timeout``.
 
     Raises:
         fs.errors.CreateFailed: when the filesystem could not be created. The
@@ -97,6 +99,7 @@ class SSHFS(FS):
             keepalive=10,
             compress=False,
             config_path='~/.ssh/config',
+            exec_timeout=None,
             **kwargs
     ):  # noqa: D102
         super(SSHFS, self).__init__()
@@ -113,6 +116,7 @@ class SSHFS(FS):
         self._port = port = int(config.get('port', port))
         self._client = client = paramiko.SSHClient()
         self._timeout = timeout
+        self._exec_timeout = timeout if exec_timeout is None else exec_timeout
 
         try:
             # TODO: add more options
@@ -416,7 +420,7 @@ class SSHFS(FS):
             bytes: the output of the command, if it didn't fail
             None: if the error pipe of the command was not empty
         """
-        _, out, err = self._client.exec_command(cmd, timeout=self._timeout)
+        _, out, err = self._client.exec_command(cmd, timeout=self._exec_timeout)
         return out.read().strip() if not err.read().strip() else None
 
     def _make_raw_info(self, name, stat_result, namespaces):
