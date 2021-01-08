@@ -170,3 +170,27 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         self.fs.setinfo("test.txt", {'details': {'modified': 100, 'accessed': 200}})
         self.assertEqual(get_accessed(self.fs), 200)
         self.assertEqual(get_modified(self.fs), 100)
+
+    def test_symlinks(self):
+        with self.fs.openbin("foo", "wb") as f:
+            f.write(b"foobar")
+
+        self.fs.delegate_fs()._sftp.symlink(
+            fs.path.join(self.test_folder, "foo"),
+            fs.path.join(self.test_folder, "bar")
+        )
+
+        # os.symlink(self._get_real_path("foo"), self._get_real_path("bar"))
+        self.assertFalse(self.fs.islink("foo"))
+        self.assertFalse(self.fs.getinfo("foo", namespaces=["link"]).is_link)
+        self.assertTrue(self.fs.islink("bar"))
+        self.assertTrue(self.fs.getinfo("bar", namespaces=["link"]).is_link)
+
+        foo_info = self.fs.getinfo("foo", namespaces=["link", "lstat"])
+        self.assertIn("link", foo_info.raw)
+        self.assertIn("lstat", foo_info.raw)
+        self.assertEqual(foo_info.get("link", "target"), None)
+        self.assertEqual(foo_info.target, foo_info.raw["link"]["target"])
+        bar_info = self.fs.getinfo("bar", namespaces=["link", "lstat"])
+        self.assertIn("link", bar_info.raw)
+        self.assertIn("lstat", bar_info.raw)
