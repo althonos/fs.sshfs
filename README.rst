@@ -108,7 +108,7 @@ Use ``fs.open_fs`` to open a filesystem with an SSH
    my_fs = fs.open_fs("ssh://[user[:password]@]host[:port]/[directory]")
 
 The ``sftp`` scheme can be used as an alias for the ``ssh`` scheme in
-the FS URL. The following URL parameters are supported: ``timeout``, 
+the FS URL. The following URL parameters are supported: ``timeout``,
 ``keepalive``.
 
 
@@ -136,7 +136,7 @@ with each argument explained below:
   an optional password, used to connect directly to the server or to
   decrypt the public key, if any given.
 ``pkey``
-  a `paramiko.PKey <http://docs.paramiko.org/en/2.2/api/keys.html#module-paramiko.pkey>`_
+  a `paramiko.PKey <http://docs.paramiko.org/en/stable/api/keys.html#paramiko.pkey.PKey>`_
   object, a path, or a list of paths to an SSH key.
 ``timeout``
   the timeout, in seconds, for networking operations.
@@ -145,9 +145,16 @@ with each argument explained below:
 ``keepalive``
   the interval of time between keepalive packets, in seconds. Set to 0 to disable.
 ``compress``
-  set to ``True`` to compress the communications with the server
+  set to ``True`` to compress the communications with the server.
 ``config_path``
   the path to an OpenSSH configuration file.
+``exec_timeout``
+  the timeout, in seconds, for arbitrary SSH commands on the server.
+``policy``
+  a `paramiko.MissingHostKeyPolicy <http://docs.paramiko.org/en/stable/api/client.html#paramiko.client.MissingHostKeyPolicy>`_
+  instance, or ``None`` to use
+  `paramiko.AutoAddPolicy <http://docs.paramiko.org/en/stable/api/client.html#paramiko.client.AutoAddPolicy>`_.
+
 
 Additional keyword arguments will be passed to the underlying connection call,
 taking precedence over implicitly derived arguments.  Once created, the
@@ -158,14 +165,14 @@ documentation <https://pyfilesystem2.readthedocs.io>`_).
 Files
 '''''
 
-`SSHFS.openbin` has the following extra options that can be passed as keyword arguments
+``SSHFS.openbin`` has the following extra options that can be passed as keyword arguments
 to control the file buffering:
 
 ``prefetch``
-  enabled by default, use a background thread to prefetch the content of a file 
+  enabled by default, use a background thread to prefetch the content of a file
   opened in reading mode. Does nothing for files in writing mode.
 ``pipelined``
-  enable pipelined mode, avoid waiting for server answer between two uploaded 
+  enable pipelined mode, avoid waiting for server answer between two uploaded
   chunks. Does nothing for files in reading mode.
 
 

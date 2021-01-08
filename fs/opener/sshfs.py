@@ -43,15 +43,16 @@ class SSHOpener(Opener):
 
         ssh_fs = SSHFS(
             ssh_host,
-            port=ssh_port,
             user=parse_result.username,
             passwd=parse_result.password,
             pkey=params.get('sshfs', 'pkey', fallback=None),
             timeout=params.getint('sshfs', 'timeout', fallback=10),
+            port=ssh_port,
             keepalive=params.getint('sshfs', 'keepalive', fallback=10),
             compress=params.getboolean('sshfs', 'compress', fallback=False),
             config_path=\
-                params.get('sshfs', 'config_path', fallback='~/.ssh/config')
+                params.get('sshfs', 'config_path', fallback='~/.ssh/config'),
+            exec_timeout=params.getint('sshfs', 'timeout', fallback=None),
         )
 
         try:
