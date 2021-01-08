@@ -31,19 +31,28 @@ class SSHFS(FS):
     """A SSH filesystem using SFTP.
 
     Arguments:
-        host (str): a SSH host or IP adress, e.g. ``shell.openshells.net``
-        user (str): the username to connect with (defaults to the current user)
+        host (str): A SSH host or IP adress, e.g. ``shell.openshells.net``
+            or ``127.0.0.1``.
+        user (str): the username to connect with (defaults to the current
+            user). If ``None`` is given, the SSH configuration file will be
+            used if available.
         passwd (str): Password for the server, or ``None`` for passwordless
             authentification. If given, it will be discarded immediately after
             establishing the connection.
-        pkey (paramiko.PKey): a private key or a list of private key  to use.
+        pkey (paramiko.PKey): A private key or a list of private key  to use.
             If ``None`` is supplied, the SSH Agent will be used to look for
             keys.
-        port (int): Port number (defaults to 22).
-        keepalive (int): the number of seconds after which a keep-alive message
+        timeout (int): The timeout to use when connecting to the SSH server, in
+            seconds (defaults to 10).
+        port (int): Port number the SSH server is listening on (defaults to 22,
+            the usual SSH port).
+        keepalive (int): The number of seconds after which a keep-alive message
             is sent (set to 0 to disable keepalive, default is 10).
-        compress (bool): set to ``True`` to compress the messages (disable by
+        compress (bool): Set to ``True`` to compress the messages (disabled by
             default).
+        config_path (str): The path to a SSH configuration file to use while
+            establishing connection. Defaults to ``~/.ssh/config``, the path
+            to the default OpenSSH client configuration file.
 
     Raises:
         fs.errors.CreateFailed: when the filesystem could not be created. The
@@ -77,9 +86,19 @@ class SSHFS(FS):
             pass
         return ssh_config
 
-    def __init__(self, host, user=None, passwd=None, pkey=None, timeout=10,
-                 port=22, keepalive=10, compress=False,
-                 config_path='~/.ssh/config', **kwargs):  # noqa: D102
+    def __init__(
+            self,
+            host,
+            user=None,
+            passwd=None,
+            pkey=None,
+            timeout=10,
+            port=22,
+            keepalive=10,
+            compress=False,
+            config_path='~/.ssh/config',
+            **kwargs
+    ):  # noqa: D102
         super(SSHFS, self).__init__()
 
         # Attempt to get a configuration for the given host
