@@ -164,3 +164,23 @@ class TestOpener(unittest.TestCase):
         # Open with create and check this does fail
         with fs.open_fs(url, create=True) as ssh_fs:
             self.assertTrue(ssh_fs.isfile("foo"))
+
+    def test_open_symlink(self):
+        # create a symlink in the home directory
+        with paramiko.SSHClient() as client:
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect('localhost', self.port, self.user, self.pasw)
+            with client.open_sftp() as sftp:
+                 sftp.mkdir('/home/{}/directory'.format(self.user))
+                 sftp.symlink(
+                    '/home/{}/directory'.format(self.user),
+                    '/home/{}/link'.format(self.user)
+                )
+                 sftp.open('/home/{}/directory/test'.format(self.user), 'w').close()
+
+        # check the symlink can be opened
+        directory = fs.path.join("home", self.user, "link")
+        base = "ssh://{}:{}@localhost:{}".format(self.user, self.pasw, self.port)
+        url = "{}/{}".format(base, directory)
+        with fs.open_fs(url) as ssh_fs:
+            self.assertEqual(ssh_fs.listdir("/"), ["test"])
