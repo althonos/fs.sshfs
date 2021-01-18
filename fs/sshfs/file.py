@@ -13,6 +13,10 @@ class SSHFile(RawWrapper):
     """A file on a remote SSH server.
     """
 
+    def __init__(self, handler, mode):
+        super(SSHFile, self).__init__(handler)
+        self.mode = mode
+
     def seek(self, offset, whence=0):  # noqa: D102
         if whence > 2:
             raise ValueError("invalid whence "
