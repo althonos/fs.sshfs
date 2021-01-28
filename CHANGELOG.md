@@ -201,7 +201,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Make `convert_sshfs_errors` inherit from `AbstractContextManager` explicitly.
 
 
-
 ## [v0.6.1] - 2017-10-02
 
 [v0.6.1]: https://github.com/althonos/fs.sshfs/compare/v0.6.0...v0.6.1
@@ -221,6 +220,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Test dependencies being unconditionally installed
   (@ReimarBauer [#1](https://github.com/althonos/fs.sshfs/pull/1)).
+
+
+## [v0.5.2] - 2017-09-18
+
+[v0.5.2]: https://github.com/althonos/fs.sshfs/compare/v0.5.1...v0.5.2
+
+### Added
+- Semantic version specifiers to dependencies in `setup.cfg`.
 
 
 ## [v0.5.1] - 2017-09-13
