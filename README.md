@@ -126,6 +126,24 @@ and try to recreate the same bug in a simple, easily reproductible
 situation.
 
 
+## Credits
+
+`fs.sshfs` is developped and maintainted by:
+- [Martin Larralde](https://github.com/althonos)
+
+The following people contributed to `fs.sshfs`:
+- [Reimar Bauer](https://github.com/ReimarBauer)
+- [Paul Gessinger](https://github.com/paulgessinger)
+- [Mariusz Kryński](https://github.com/mrk-its)
+- [Will McGugan](https://github.com/willmcgugan)
+- [Jeremy Nimmer](https://github.com/jwnimmer-tri)
+- [Tim Nyborg](https://github.com/timnyborg)
+- [Danica J. Sutherland](https://github.com/djsutherland)
+- [John Vandenberg](https://github.com/jayvdb)
+
+This project obviously owes a lot to the PyFilesystem2 project and
+[all its contributors](https://github.com/PyFilesystem/pyfilesystem2/blob/master/CONTRIBUTORS.md).
+
 ## See also
 
 -   [fs](https://github.com/Pyfilesystem/pyfilesystem2), the core
