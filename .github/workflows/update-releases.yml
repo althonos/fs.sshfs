@@ -1,0 +1,22 @@
+name: Update releases
+
+on:
+  - push
+
+jobs:
+  chandler:
+    environment: Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Set up Ruby 2.7
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+    - name: Install chandler gem
+      run: gem install chandler
+    - name: Update releases messages
+      run: chandler push --github="$GITHUB_REPOSITORY" --changelog="CHANGELOG.md"
+      env:
+        CHANDLER_GITHUB_API_TOKEN: ${{ secrets.CHANDLER_GITHUB_API_TOKEN }}
