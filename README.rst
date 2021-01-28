@@ -4,33 +4,33 @@
 .. |star me| image:: https://img.shields.io/github/stars/althonos/fs.sshfs.svg?style=social&maxAge=3600&label=Star
    :target: https://github.com/althonos/fs.sshfs/stargazers
 
-|Source| |PyPI| |Conda| |Travis| |Codecov| |Codacy| |Format| |License|
+|Source| |PyPI| |Conda| |Actions| |Codecov| |Codacy| |Format| |License|
 
-.. |Codacy| image:: https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg?style=flat-square&maxAge=300
+.. |Codacy| image:: https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg?logo=codacy&style=flat-square&maxAge=300
    :target: https://www.codacy.com/app/althonos/fs.sshfs/dashboard
 
-.. |Travis| image:: https://img.shields.io/travis/althonos/fs.sshfs/master.svg?style=flat-square&maxAge=300
+.. |Actions| image:: https://img.shields.io/github/workflow/status/althonos/fs.sshfs/Test/master?logo=github&style=flat-square&maxAge=300
    :target: https://travis-ci.org/althonos/fs.sshfs/branches
 
-.. |Codecov| image:: https://img.shields.io/codecov/c/github/althonos/fs.sshfs/master.svg?style=flat-square&maxAge=300
+.. |Codecov| image:: https://img.shields.io/codecov/c/github/althonos/fs.sshfs/master.svg?logo=codecov&style=flat-square&maxAge=300
    :target: https://codecov.io/gh/althonos/fs.sshfs
 
-.. |PyPI| image:: https://img.shields.io/pypi/v/fs.sshfs.svg?style=flat-square&maxAge=300
+.. |PyPI| image:: https://img.shields.io/pypi/v/fs.sshfs.svg?logo=pypi&style=flat-square&maxAge=3600
    :target: https://pypi.python.org/pypi/fs.sshfs
 
-.. |Conda| image:: https://anaconda.org/conda-forge/fs.sshfs/badges/installer/conda.svg
+.. |Conda| image:: https://img.shields.io/conda/vn/conda-forge/fs.sshfs?logo=anaconda&style=flat-square&maxAge=3600
    :target: https://anaconda.org/conda-forge/fs.sshfs
 
-.. |Format| image:: https://img.shields.io/pypi/format/fs.sshfs.svg?style=flat-square&maxAge=300
+.. |Format| image:: https://img.shields.io/pypi/format/fs.sshfs.svg?logo=python&style=flat-square&maxAge=300
    :target: https://pypi.python.org/pypi/fs.sshfs
 
-.. |Versions| image:: https://img.shields.io/pypi/pyversions/fs.sshfs.svg?style=flat-square&maxAge=300
+.. |Versions| image:: https://img.shields.io/pypi/pyversions/fs.sshfs.svg?logo=python&style=flat-square&maxAge=300
    :target: https://travis-ci.org/althonos/fs.sshfs
 
-.. |License| image:: https://img.shields.io/pypi/l/fs.sshfs.svg?style=flat-square&maxAge=300
+.. |License| image:: https://img.shields.io/pypi/l/fs.sshfs.svg?logo=gnu&style=flat-square&maxAge=36000
    :target: https://choosealicense.com/licenses/lgpl-2.1/
 
-.. |Source| image:: https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=300&style=flat-square
+.. |Source| image:: https://img.shields.io/badge/source-GitHub-303030.svg?logo=git&maxAge=36000&style=flat-square
    :target: https://github.com/althonos/fs.sshfs
 
 
