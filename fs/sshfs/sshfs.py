@@ -381,6 +381,92 @@ class SSHFS(FS):
             if 'permissions' in access:
                 self._chmod(_path, access['permissions'].mode)
 
+    def download(self, path, file, chunk_size=None, callback=None, **options):
+        """Copy a file from the filesystem to a file-like object.
+
+        This method uses the underlying `paramiko.SFTP.getfo` method, which
+        should be more efficient than manually opening and reading from a
+        file.
+
+        Arguments:
+            path (str): Path to a resource.
+            file (file-like): A file-like object open for writing in
+                binary mode.
+            chunk_size (int, optional): Ignored, kept for compatibility
+                with the `fs.base.FS.download` signature.
+            callback (callable, optional): An optional callback function
+                (form: ``func(int, int)``) that accepts the bytes transferred
+                so far and the total bytes to be transferred. Passed
+                transparently to `~paramiko.SFTP.getfo`.
+
+        Note that the file object ``file`` will *not* be closed by this
+        method. Take care to close it after this method completes
+        (ideally with a context manager).
+
+        Example:
+            >>> with open('starwars.mov', 'wb') as write_file:
+            ...     my_fs.download('/movies/starwars.mov', write_file)
+
+        """
+        _path = self.validatepath(path)
+        with self._lock:
+            if not self.exists(_path):
+                raise errors.ResourceNotFound(path)
+            elif self.isdir(_path):
+                raise errors.FileExpected(path)
+            with convert_sshfs_errors('download', path):
+                self._sftp.getfo(_path, file, callback=callback)
+
+    def upload(self, path, file, chunk_size=None, callback=None, file_size=None, confirm=True, **options):
+        """Set a file to the contents of a binary file object.
+
+        This method uses the underlying `paramiko.SFTP.putfo` method, which
+        should be more efficient than manually opening and reading from a
+        file.
+
+        Arguments:
+            path (str): A path on the filesystem.
+            file (io.IOBase): A file object open for reading in
+                binary mode.
+            chunk_size (int, optional): Ignored, kept for compatibility
+                with the `fs.base.FS.download` signature.
+            callback (callable, optional): An optional callback function
+                (form: ``func(int, int)``) that accepts the bytes transferred
+                so far and the total bytes to be transferred. Passed
+                transparently to `~paramiko.SFTP.put`.
+            file_size (int, optional): An optional size parameter, passed
+                to ``callback``. If `None` is given, uses ``0``.
+            confirm (bool): If `True` (the default), do a ``stat()`` call
+                once finished to confirm the size of the uploaded file.
+
+        Raises:
+            fs.errors.ResourceNotFound: If a parent directory of
+                ``path`` does not exist.
+
+        Note that the file object ``file`` will *not* be closed by this
+        method. Take care to close it after this method completes
+        (ideally with a context manager).
+
+        Example:
+            >>> with open('~/movies/starwars.mov', 'rb') as read_file:
+            ...     my_fs.upload('starwars.mov', read_file)
+
+        """
+        _path = self.validatepath(path)
+        with self._lock:
+            if not self.exists(dirname(_path)):
+                raise errors.ResourceNotFound(path)
+            elif self.isdir(_path):
+                raise errors.FileExpected(path)
+            with convert_sshfs_errors('upload', path):
+                self._sftp.putfo(
+                    file,
+                    _path,
+                    file_size=file_size,
+                    callback=callback,
+                    confirm=confirm
+                )
+
     @cached_property
     def platform(self):
         """The platform the server is running on.
