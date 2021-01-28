@@ -1,0 +1,44 @@
+name: Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - 2.7
+          - 3.5
+          - 3.6
+          - 3.7
+          - 3.8
+          - 3.9
+          - pypy-2.7
+          - pypy-3.6
+          - pypy-3.7
+    steps:
+    - name: Checkout SSH docker container
+      run: docker pull sjourdan/alpine-sshd
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Update pip
+      run: python -m pip install -U pip wheel setuptools
+    - name: Install test dependencies
+      run: python -m pip install -U -r tests/requirements.txt
+    - name: Install local code
+      run: python -m pip install .
+    - name: Test with coverage
+      run: python -m coverage run -m unittest discover -vv
+    - name: Report coverage
+      run: python -m coverage report
+    - name: Export coverage statistics
+      run: python -m coverage xml
+    - name: Upload coverage statistics to Codecov
+      run: python -m codecov
