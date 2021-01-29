@@ -6,7 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/fs.sshfs/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/althonos/fs.sshfs/compare/v1.0.0...HEAD
+
+
+## [v1.0.0] - 2021-01-18
+
+[v1.0.0]: https://github.com/althonos/fs.sshfs/compare/v0.13.1...v1.0.0
+
 
 ### Added
 - `SSHFS.upload` (resp. `download`) implementation using `paramiko.SFTP.putfo`
@@ -16,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Switched from Travis-CI and AppVeyor to GitHub Actions for continuous integration.
 - Rewrote `README.rst` in Markdown format.
+- Mark the project as *Stable* in `setup.cfg` classifiers.
 
 
 ## [v0.13.1] - 2021-01-18
