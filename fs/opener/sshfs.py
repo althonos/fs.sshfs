@@ -11,21 +11,15 @@ from .registry import registry
 from ..subfs import ClosingSubFS
 from ..errors import FSError, CreateFailed
 
-__license__ = "LGPL-2.1+"
-__copyright__ = "Copyright (c) 2017-2019 Martin Larralde"
-__author__ = "Martin Larralde <martin.larralde@ens-cachan.fr>"
-__version__ = 'dev'
-
-
-# Dynamically get the version of the main module
-try:
-    _name = __name__.replace('.opener', '')
-    import pkg_resources
-    __version__ = pkg_resources.get_distribution(_name).version
-except Exception: # pragma: no cover
-    pkg_resources = None
-finally:
-    del pkg_resources
+__license__ = "LGPLv2+"
+__copyright__ = "Copyright (c) 2017-2021 Martin Larralde"
+__author__ = "Martin Larralde <martin.larralde@embl.de>"
+__version__ = __version__ = (
+    __import__("pkg_resources")
+    .resource_string("fs.sshfs", "_version.txt")
+    .strip()
+    .decode("ascii")
+)
 
 
 class SSHOpener(Opener):

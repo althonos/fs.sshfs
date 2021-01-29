@@ -1,2 +1,3 @@
 include COPYING
 include CHANGELOG.md
+include fs/sshfs/_version.txt
