@@ -3,7 +3,7 @@
 [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?logo=git&maxAge=36000&style=flat-square)](https://github.com/althonos/fs.sshfs)
 [![PyPI](https://img.shields.io/pypi/v/fs.sshfs.svg?logo=pypi&style=flat-square&maxAge=3600)](https://pypi.python.org/pypi/fs.sshfs)
 [![Conda](https://img.shields.io/conda/vn/conda-forge/fs.sshfs?logo=anaconda&style=flat-square&maxAge=3600)](https://anaconda.org/conda-forge/fs.sshfs)
-[![Actions](https://img.shields.io/github/workflow/status/althonos/fs.sshfs/Test/master?logo=github&style=flat-square&maxAge=300)](https://travis-ci.org/althonos/fs.sshfs/branches)
+[![Actions](https://img.shields.io/github/workflow/status/althonos/fs.sshfs/Test/master?logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/fs.sshfs/actions)
 [![Codecov](https://img.shields.io/codecov/c/github/althonos/fs.sshfs/master.svg?logo=codecov&style=flat-square&maxAge=300)](https://codecov.io/gh/althonos/fs.sshfs)
 [![Codacy](https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg?logo=codacy&style=flat-square&maxAge=300)](https://www.codacy.com/app/althonos/fs.sshfs/dashboard)
 [![License](https://img.shields.io/pypi/l/fs.sshfs.svg?logo=gnu&style=flat-square&maxAge=36000)](https://choosealicense.com/licenses/lgpl-2.1/)
