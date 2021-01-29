@@ -5,7 +5,7 @@ on:
 
 jobs:
   package:
-    environment: Release
+    environment: PyPI
     runs-on: ubuntu-latest
     name: Publish Python code
     steps:

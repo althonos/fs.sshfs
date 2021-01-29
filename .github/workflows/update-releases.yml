@@ -5,7 +5,7 @@ on:
 
 jobs:
   chandler:
-    environment: Release
+    environment: GitHub Releases
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
