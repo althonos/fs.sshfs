@@ -421,8 +421,7 @@ class SSHFS(FS):
         """Set a file to the contents of a binary file object.
 
         This method uses the underlying `paramiko.SFTP.putfo` method, which
-        should be more efficient than manually opening and reading from a
-        file.
+        should be more efficient than manually opening and writing to a file.
 
         Arguments:
             path (str): A path on the filesystem.
