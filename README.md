@@ -11,6 +11,8 @@
 [![Format](https://img.shields.io/pypi/format/fs.sshfs.svg?style=flat-square&maxAge=300)](https://pypi.org/project/fs.sshfs)
 [![GitHub issues](https://img.shields.io/github/issues/althonos/fs.sshfs.svg?style=flat-square&maxAge=600)](https://github.com/althonos/fs.sshfs/issues)
 [![Downloads](https://img.shields.io/badge/dynamic/json?style=flat-square&color=303f9f&maxAge=86400&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fprojects%2Ffs.sshfs)](https://pepy.tech/project/fs.sshfs)
+[![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fs.sshfs/blob/master/CHANGELOG.md)
+
 
 ## Requirements
 
