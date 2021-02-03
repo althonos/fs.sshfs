@@ -1,7 +1,9 @@
 name: Update releases
 
 on:
-  - push
+  push:
+    tags:
+      - v*.*.*
 
 jobs:
   chandler:
