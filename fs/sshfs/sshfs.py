@@ -273,7 +273,7 @@ class SSHFS(FS):
             if self.isfile(_dst_path):
                 if not overwrite:
                     raise errors.DestinationExists(dst_path)
-                with convert_sshfs_errors('remove', dst_path):
+                with convert_sshfs_errors('move', dst_path):
                     self._sftp.remove(_dst_path)
             # rename the file through SFTP's 'RENAME'
             self._sftp.rename(_src_path, _dst_path)
@@ -595,8 +595,8 @@ class SSHFS(FS):
         """Set the *accessed* and *modified* times of a resource.
         """
         if accessed is not None or modified is not None:
-            accessed = int(modified if accessed is None else accessed)
-            modified = int(accessed if modified is None else modified)
+            accessed = float(modified if accessed is None else accessed)
+            modified = float(accessed if modified is None else modified)
             self._sftp.utime(path, (accessed, modified))
         else:
             self._sftp.utime(path, None)

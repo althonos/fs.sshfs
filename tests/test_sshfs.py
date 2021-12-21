@@ -194,3 +194,11 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         bar_info = self.fs.getinfo("bar", namespaces=["link", "lstat"])
         self.assertIn("link", bar_info.raw)
         self.assertIn("lstat", bar_info.raw)
+
+    def test_setinfo(self):
+        # the builtin test_setinfo, assumes we can set times with subsecond
+        # precision, but this is not supported by Paramiko
+        # we patch `time.time` to return an int, problem solved for now!
+        now = int(time.time())
+        with utils.mock.patch("time.time", lambda: now):
+            super(TestSSHFS, self).test_setinfo()
