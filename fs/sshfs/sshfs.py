@@ -252,14 +252,16 @@ class SSHFS(FS):
 
         return self.opendir(path)
 
-    def move(self, src_path, dst_path, overwrite=False):
+    def move(self, src_path, dst_path, overwrite=False, preserve_time=False):
+        info_ns = ("basic", "details") if preserve_time else ("basic",)
+
         self.check()
         _src_path = self.validatepath(src_path)
         _dst_path = self.validatepath(dst_path)
 
         with self._lock:
             # check src exists and is a file
-            src_info = self.getinfo(_src_path)
+            src_info = self.getinfo(_src_path, namespaces=info_ns)
             if src_info.is_dir:
                 raise errors.FileExpected(src_path)
             # check dst is not a dir and can be created
@@ -275,6 +277,13 @@ class SSHFS(FS):
                     self._sftp.remove(_dst_path)
             # rename the file through SFTP's 'RENAME'
             self._sftp.rename(_src_path, _dst_path)
+            # preserve times if required
+            if preserve_time:
+                self._utime(
+                    _path,
+                    src_info.raw["details"]["modified"],
+                    src_info.raw["details"]["accessed"],
+                )
 
     def openbin(self, path, mode='r', buffering=-1, **options):  # noqa: D102
         """Open a binary file-like object.
