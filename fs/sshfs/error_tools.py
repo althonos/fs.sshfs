@@ -42,11 +42,6 @@ class _ConvertSSHFSErrors(object):
     DIR_ERRORS[errno.EEXIST] = errors.DirectoryExists
     DIR_ERRORS[errno.EINVAL] = errors.DirectoryExpected
 
-    # if _WINDOWS_PLATFORM:  # pragma: no cover
-    #     DIR_ERRORS[13] = errors.DirectoryExpected
-    #     DIR_ERRORS[267] = errors.DirectoryExpected
-    #     FILE_ERRORS[13] = errors.FileExpected
-
     def __init__(self, opname, path, directory=False):
         self._opname = opname
         self._path = path
@@ -65,9 +60,6 @@ class _ConvertSSHFSErrors(object):
         if exc_type and isinstance(exc_value, EnvironmentError):
             _errno = exc_value.errno
             fserror = ssh_errors.get(_errno, errors.OperationFailed)
-            if _errno == errno.EACCES and sys.platform == "win32":
-                if getattr(exc_value, 'args', None) == 32:  # pragma: no cover
-                    fserror = errors.ResourceLocked
             six.reraise(
                 fserror,
                 fserror(
