@@ -130,7 +130,7 @@ situation.
 
 ## Credits
 
-`fs.sshfs` is developped and maintainted by:
+`fs.sshfs` is developed and maintained by:
 - [Martin Larralde](https://github.com/althonos)
 
 The following people contributed to `fs.sshfs`:
