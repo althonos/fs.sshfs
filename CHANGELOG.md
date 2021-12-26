@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [v1.0.1] - 2021-12-21
 
-[v1.0.0]: https://github.com/althonos/fs.sshfs/compare/v1.0.0...v1.0.1
+[v1.0.1]: https://github.com/althonos/fs.sshfs/compare/v1.0.0...v1.0.1
 
 ### Fixed
 - `SSHFS.move` not supporting the `preserve_time` argument ([#51](https://github.com/althonos/fs.sshfs/issues/51)).
