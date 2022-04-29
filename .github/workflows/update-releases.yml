@@ -6,19 +6,16 @@ on:
       - v*.*.*
 
 jobs:
-  chandler:
+  release:
     environment: GitHub Releases
     runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/v')"
+    name: Release
+    needs: upload
     steps:
     - name: Checkout code
       uses: actions/checkout@v1
-    - name: Set up Ruby 2.7
-      uses: actions/setup-ruby@v1
+    - name: Release a Changelog
+      uses: rasmus-saks/release-a-changelog-action@v1.0.1
       with:
-        ruby-version: 2.7
-    - name: Install chandler gem
-      run: gem install chandler
-    - name: Update releases messages
-      run: chandler push --github="$GITHUB_REPOSITORY" --changelog="CHANGELOG.md"
-      env:
-        CHANDLER_GITHUB_API_TOKEN: ${{ secrets.CHANDLER_GITHUB_API_TOKEN }}
+        github-token: '${{ secrets.GITHUB_TOKEN }}'
