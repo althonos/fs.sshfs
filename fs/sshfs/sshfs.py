@@ -3,12 +3,14 @@
 """
 from __future__ import unicode_literals
 from __future__ import absolute_import
+from __future__ import annotations
 
 import itertools
 import os
 import stat
 import socket
 import sys
+from typing import Optional
 
 import six
 import paramiko
@@ -104,6 +106,7 @@ class SSHFS(FS):
             config_path='~/.ssh/config',
             exec_timeout=None,
             policy=None,
+            look_for_keys: Optional[bool]=None,
             **kwargs
     ):  # noqa: D102
         super(SSHFS, self).__init__()
@@ -131,7 +134,7 @@ class SSHFS(FS):
             argdict = {
                 "pkey": pkey,
                 "key_filename": keyfile,
-                "look_for_keys": True if (pkey and keyfile) is None else False,
+                "look_for_keys": look_for_keys if look_for_keys is not None else (True if (pkey and keyfile) is None else False),
                 "compress": compress,
                 "timeout": timeout
             }
