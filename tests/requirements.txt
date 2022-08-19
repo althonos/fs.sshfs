@@ -1,4 +1,4 @@
 codecov ~=2.1
-docker ~=4.4
+docker ~=6.0
 semantic-version ~=2.6
 mock ~=3.0.5  ; python_version < '3.3'
