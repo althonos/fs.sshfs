@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import re
 import time
 import collections
+import warnings
 
 import fs
 import semantic_version
@@ -12,7 +13,8 @@ import semantic_version
 try:
     import docker
     docker_client = docker.from_env(version='auto')
-except Exception:
+except Exception as err:
+    warnings.warn("Failed to start Docker client: {}".format(err))
     docker_client = None
 
 try:
