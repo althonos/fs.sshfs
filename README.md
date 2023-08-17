@@ -3,14 +3,14 @@
 [![Source](https://img.shields.io/badge/source-GitHub-303030.svg?logo=git&maxAge=36000&style=flat-square)](https://github.com/althonos/fs.sshfs)
 [![PyPI](https://img.shields.io/pypi/v/fs.sshfs.svg?logo=pypi&style=flat-square&maxAge=3600)](https://pypi.python.org/pypi/fs.sshfs)
 [![Conda](https://img.shields.io/conda/vn/conda-forge/fs.sshfs?logo=anaconda&style=flat-square&maxAge=3600)](https://anaconda.org/conda-forge/fs.sshfs)
-[![Actions](https://img.shields.io/github/workflow/status/althonos/fs.sshfs/Test/master?logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/fs.sshfs/actions)
+[![Actions](https://img.shields.io/github/actions/workflow/status/althonos/fs.sshfs/test.yml?branch=master&logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/fs.sshfs/actions)
 [![Codecov](https://img.shields.io/codecov/c/github/althonos/fs.sshfs/master.svg?logo=codecov&style=flat-square&maxAge=300)](https://codecov.io/gh/althonos/fs.sshfs)
 [![Codacy](https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg?logo=codacy&style=flat-square&maxAge=300)](https://www.codacy.com/app/althonos/fs.sshfs/dashboard)
 [![License](https://img.shields.io/pypi/l/fs.sshfs.svg?logo=gnu&style=flat-square&maxAge=36000)](https://choosealicense.com/licenses/lgpl-2.1/)
 [![Versions](https://img.shields.io/pypi/pyversions/fs.sshfs.svg?logo=python&style=flat-square&maxAge=300)](https://pypi.org/project/fs.sshfs)
 [![Format](https://img.shields.io/pypi/format/fs.sshfs.svg?style=flat-square&maxAge=300)](https://pypi.org/project/fs.sshfs)
 [![GitHub issues](https://img.shields.io/github/issues/althonos/fs.sshfs.svg?style=flat-square&maxAge=600)](https://github.com/althonos/fs.sshfs/issues)
-[![Downloads](https://img.shields.io/badge/dynamic/json?style=flat-square&color=303f9f&maxAge=86400&label=downloads&query=%24.total_downloads&url=https%3A%2F%2Fapi.pepy.tech%2Fapi%2Fprojects%2Ffs.sshfs)](https://pepy.tech/project/fs.sshfs)
+[![Downloads](https://img.shields.io/pypi/dm/fs.sshfs?style=flat-square&color=303f9f&maxAge=86400&label=downloads)](https://pepy.tech/project/fs.sshfs)
 [![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fs.sshfs/blob/master/CHANGELOG.md)
 
 
