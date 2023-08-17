@@ -142,7 +142,7 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
             '_exec_command',
             side_effect=paramiko.ssh_exception.SSHException()
         ) as _exec_command:
-            self.assertEquals(ssh.platform, "unknown")
+            self.assertEqual(ssh.platform, "unknown")
             if sys.version_info[:2] != (3,5):
                 _exec_command.assert_called()
 

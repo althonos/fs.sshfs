@@ -56,13 +56,13 @@ class TestOpener(unittest.TestCase):
                         pkey.get_name(), pkey.get_base64()).encode('utf-8'))
 
     def setUp(self):
-        # Generate an RSA key and add it to the server
-        self.rsa_key = rsa_key = paramiko.RSAKey.generate(bits=512)
-        self.addKeyToServer(rsa_key)
+        # Generate an ECDSA key and add it to the server
+        self.key = paramiko.ECDSAKey.generate()
+        self.addKeyToServer(self.key)
         # Write the key to a file
         key_fd, self.key_file = tempfile.mkstemp()
         os.close(key_fd)
-        rsa_key.write_private_key_file(self.key_file)
+        self.key.write_private_key_file(self.key_file)
         #with open(key_fd, 'w+') as key_handle:
         # Create an empty config file
         _, self.config_file = tempfile.mkstemp()
@@ -102,7 +102,7 @@ class TestOpener(unittest.TestCase):
         self.assertFunctional(ssh_fs)
 
     def test_publickey(self):
-        ssh_fs = SSHFS('localhost', self.user, port=self.port, pkey=self.rsa_key)
+        ssh_fs = SSHFS('localhost', self.user, port=self.port, pkey=self.key)
         self.assertFunctional(ssh_fs)
 
     def test_publickey_file(self):
