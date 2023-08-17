@@ -26,7 +26,7 @@ jobs:
     - name: Checkout SSH docker container
       run: docker pull sjourdan/alpine-sshd
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -54,11 +54,11 @@ jobs:
     if: startsWith(github.ref, 'refs/tags')
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
-    - name: Set up Python 3.9
+      uses: actions/checkout@v3
+    - name: Set up Python 3.11
       uses: actions/setup-python@v1
       with:
-        python-version: 3.9
+        python-version: 3.11
     - name: Install build package
       run: python -m pip install -U build
     - name: Build a wheel and source tarball
@@ -68,3 +68,17 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+
+  release:
+    environment: GitHub Releases
+    runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/v')"
+    name: Release
+    needs: package
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Release a Changelog
+      uses: rasmus-saks/release-a-changelog-action@v1.0.1
+      with:
+        github-token: '${{ secrets.GITHUB_TOKEN }}'
