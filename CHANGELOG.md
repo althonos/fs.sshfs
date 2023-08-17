@@ -6,7 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-[Unreleased]: https://github.com/althonos/fs.sshfs/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/althonos/fs.sshfs/compare/v1.0.2...HEAD
+
+
+## [v1.0.2] - 2023-08-17
+
+[v1.0.2]: https://github.com/althonos/fs.sshfs/compare/v1.0.1...v1.0.2
+
+### Changed
+- Add explicit support for Paramiko 3 ([#57](https://github.com/althonos/fs.sshfs/issues/57)).
+
 
 
 ## [v1.0.1] - 2021-12-21
