@@ -27,6 +27,7 @@ class TestCreateFailed(unittest.TestCase):
             fs.errors.CreateFailed, SSHFS, 'localhost', 'baduser', timeout=1)
 
 
+@unittest.skipIf(utils.docker_client is None, "docker service unreachable.")
 class TestOpener(unittest.TestCase):
 
     user = "user"
