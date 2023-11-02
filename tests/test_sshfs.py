@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import io
 import stat
 import sys
 import time
@@ -202,3 +203,20 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         now = int(time.time())
         with utils.mock.patch("time.time", lambda: now):
             super(TestSSHFS, self).test_setinfo()
+
+    def test_download_prefetch(self):
+        # SSHFS does not support prefetching
+        test_bytes = b"Hello, World"
+        self.fs.writebytes("hello.bin", test_bytes)
+
+        write_file = io.BytesIO()
+        self.fs.download("hello.bin", write_file, prefetch=False)
+        self.assertEqual(write_file.getvalue(), test_bytes)
+
+        write_file = io.BytesIO()
+        self.fs.download("hello.bin", write_file, prefetch=True)
+        self.assertEqual(write_file.getvalue(), test_bytes)
+
+        write_file = io.BytesIO()
+        self.fs.download("hello.bin", write_file, prefetch=True, max_concurrent_prefetch_requests=2)
+        self.assertEqual(write_file.getvalue(), test_bytes)
