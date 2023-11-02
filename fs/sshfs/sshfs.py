@@ -408,6 +408,13 @@ class SSHFS(FS):
                 so far and the total bytes to be transferred. Passed
                 transparently to `~paramiko.SFTP.getfo`.
 
+        Keyword Arguments:
+            prefetch (bool): Controls whether prefetching is performed
+                Defaults to ``True``.
+            max_concurrent_prefetch_requests (int): The maximum number of concurrent read requests to prefetch. See
+                `.SFTPClient.get` (its ``max_concurrent_prefetch_requests`` param)
+                for details.
+
         Note that the file object ``file`` will *not* be closed by this
         method. Take care to close it after this method completes
         (ideally with a context manager).
@@ -423,8 +430,15 @@ class SSHFS(FS):
                 raise errors.ResourceNotFound(path)
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
+            _options = {key: value for key, value in options.items() if
+                        key in ('prefetch', 'max_concurrent_prefetch_requests')}
             with convert_sshfs_errors('download', path):
-                self._sftp.getfo(_path, file, callback=callback)
+                self._sftp.getfo(
+                    _path,
+                    file,
+                    callback=callback,
+                    **_options
+                )
 
     def upload(self, path, file, chunk_size=None, callback=None, file_size=None, confirm=True, **options):
         """Set a file to the contents of a binary file object.
