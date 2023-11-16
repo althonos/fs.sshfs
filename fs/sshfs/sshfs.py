@@ -27,6 +27,13 @@ from .file import SSHFile
 from .error_tools import convert_sshfs_errors
 
 
+def _get_version_number():
+    """
+    Returns version number of paramiko as a tuple of ints.
+    """
+    return tuple(int(x) for x in getattr(paramiko, "__version__", "0.0.0").split("."))
+
+
 class SSHFS(FS):
     """A SSH filesystem using SFTP.
 
@@ -432,6 +439,8 @@ class SSHFS(FS):
                 raise errors.FileExpected(path)
             _options = {key: value for key, value in options.items() if
                         key in ('prefetch', 'max_concurrent_prefetch_requests')}
+            if _get_version_number()[0] >= 3:
+                _options.pop('max_concurrent_prefetch_requests', None)
             with convert_sshfs_errors('download', path):
                 self._sftp.getfo(
                     _path,
