@@ -439,7 +439,7 @@ class SSHFS(FS):
                 raise errors.FileExpected(path)
             _options = {key: value for key, value in options.items() if
                         key in ('prefetch', 'max_concurrent_prefetch_requests')}
-            if _get_version_number()[0] >= 3:
+            if _get_version_number()[0] < 3:
                 _options.pop('max_concurrent_prefetch_requests', None)
             with convert_sshfs_errors('download', path):
                 self._sftp.getfo(
