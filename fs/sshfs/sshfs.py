@@ -27,6 +27,13 @@ from .file import SSHFile
 from .error_tools import convert_sshfs_errors
 
 
+def _get_version_number():
+    """
+    Returns version number of paramiko as a tuple of ints.
+    """
+    return tuple(int(x if x.isdigit() else "0") for x in getattr(paramiko, "__version__", "0.0.0").split("."))
+
+
 class SSHFS(FS):
     """A SSH filesystem using SFTP.
 
@@ -408,6 +415,13 @@ class SSHFS(FS):
                 so far and the total bytes to be transferred. Passed
                 transparently to `~paramiko.SFTP.getfo`.
 
+        Keyword Arguments:
+            prefetch (bool): Controls whether prefetching is performed
+                Defaults to ``True``. Applicable only for paramiko >= 2.8.0
+            max_concurrent_prefetch_requests (int): The maximum number of concurrent read requests to prefetch. See
+                `.SFTPClient.get` (its ``max_concurrent_prefetch_requests`` param)
+                for details. Applicable only for paramiko >= 3.3.0
+
         Note that the file object ``file`` will *not* be closed by this
         method. Take care to close it after this method completes
         (ideally with a context manager).
@@ -423,8 +437,24 @@ class SSHFS(FS):
                 raise errors.ResourceNotFound(path)
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
+
+            _options = options.copy()
+            _version = _get_version_number()
+            if _version[0] >= 2:
+                if _version[0] == 2 and _version[1] < 8:
+                    _options.pop('prefetch', None)
+                if bool(_version[0] == 3 and _version[1] < 3) or _version[0] < 3:
+                    _options.pop('max_concurrent_prefetch_requests', None)
+            else:
+                _options = {}
+
             with convert_sshfs_errors('download', path):
-                self._sftp.getfo(_path, file, callback=callback)
+                self._sftp.getfo(
+                    _path,
+                    file,
+                    callback=callback,
+                    **_options
+                )
 
     def upload(self, path, file, chunk_size=None, callback=None, file_size=None, confirm=True, **options):
         """Set a file to the contents of a binary file object.
