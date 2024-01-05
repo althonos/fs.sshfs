@@ -13,9 +13,10 @@ import paramiko.ssh_exception
 import fs.path
 import fs.test
 import fs.errors
-from fs.sshfs import SSHFS
 from fs.subfs import ClosingSubFS
 from fs.permissions import Permissions
+
+from miarec_sshfs import SSHFS
 
 from . import utils
 

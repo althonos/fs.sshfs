@@ -9,7 +9,7 @@ import sys
 
 import six
 
-from .. import errors
+from fs import errors
 
 
 class _ConvertSSHFSErrors(object):

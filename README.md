@@ -1,17 +1,9 @@
-# `fs.sshfs` [![star me](https://img.shields.io/github/stars/althonos/fs.sshfs.svg?style=social&maxAge=3600&label=Star)](https://github.com/althonos/fs.sshfs/stargazers)
+# `miarec_sshfs` SFTP filesystem for PyFilesystem2
 
-[![Source](https://img.shields.io/badge/source-GitHub-303030.svg?logo=git&maxAge=36000&style=flat-square)](https://github.com/althonos/fs.sshfs)
-[![PyPI](https://img.shields.io/pypi/v/fs.sshfs.svg?logo=pypi&style=flat-square&maxAge=3600)](https://pypi.python.org/pypi/fs.sshfs)
-[![Conda](https://img.shields.io/conda/vn/conda-forge/fs.sshfs?logo=anaconda&style=flat-square&maxAge=3600)](https://anaconda.org/conda-forge/fs.sshfs)
-[![Actions](https://img.shields.io/github/actions/workflow/status/althonos/fs.sshfs/test.yml?branch=master&logo=github&style=flat-square&maxAge=300)](https://github.com/althonos/fs.sshfs/actions)
-[![Codecov](https://img.shields.io/codecov/c/github/althonos/fs.sshfs/master.svg?logo=codecov&style=flat-square&maxAge=300)](https://codecov.io/gh/althonos/fs.sshfs)
-[![Codacy](https://img.shields.io/codacy/grade/9734bea6ec004cc4914a377d9e9f54bd/master.svg?logo=codacy&style=flat-square&maxAge=300)](https://www.codacy.com/app/althonos/fs.sshfs/dashboard)
+This is a fork of [fs.sshfs](https://github.com/althonos/fs.sshfs) project, with modifications that are required for our needs.
+
+[![Actions](https://img.shields.io/github/actions/workflow/status/althonos/fs.sshfs/test.yml?branch=master&logo=github&style=flat-square&maxAge=300)](https://github.com/miarec/miarec_sshfs/actions)
 [![License](https://img.shields.io/pypi/l/fs.sshfs.svg?logo=gnu&style=flat-square&maxAge=36000)](https://choosealicense.com/licenses/lgpl-2.1/)
-[![Versions](https://img.shields.io/pypi/pyversions/fs.sshfs.svg?logo=python&style=flat-square&maxAge=300)](https://pypi.org/project/fs.sshfs)
-[![Format](https://img.shields.io/pypi/format/fs.sshfs.svg?style=flat-square&maxAge=300)](https://pypi.org/project/fs.sshfs)
-[![GitHub issues](https://img.shields.io/github/issues/althonos/fs.sshfs.svg?style=flat-square&maxAge=600)](https://github.com/althonos/fs.sshfs/issues)
-[![Downloads](https://img.shields.io/pypi/dm/fs.sshfs?style=flat-square&color=303f9f&maxAge=86400&label=downloads)](https://pepy.tech/project/fs.sshfs)
-[![Changelog](https://img.shields.io/badge/keep%20a-changelog-8A0707.svg?maxAge=2678400&style=flat-square)](https://github.com/althonos/fs.sshfs/blob/master/CHANGELOG.md)
 
 
 ## Requirements
@@ -22,50 +14,36 @@
 | **paramiko** | [![PyPI paramiko](https://img.shields.io/pypi/v/paramiko.svg?maxAge=300&style=flat-square)](https://pypi.python.org/pypi/paramiko) | [![Source paramiko]( https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=36000&style=flat-square )]( https://github.com/paramiko/paramiko) | [![License paramiko](https://img.shields.io/pypi/l/paramiko.svg?maxAge=36000&style=flat-square)](https://choosealicense.com/licenses/lgpl-2.1/) |
 | **property-cached** | [![PyPI property](https://img.shields.io/pypi/v/property-cached.svg?maxAge=300&style=flat-square)](https://pypi.python.org/pypi/property-cached) | [![Source property]( https://img.shields.io/badge/source-GitHub-303030.svg?maxAge=36000&style=flat-square )](https://github.com/althonos/property-cached) | [![License property]( https://img.shields.io/pypi/l/property-cached.svg?maxAge=36000&style=flat-square )]( https://choosealicense.com/licenses/bsd-3-clause/) |
 
-`fs.sshfs` supports all Python versions supported by PyFilesystem2:
-Python 2.7, and Python 3.5 onwards. Code should still be compatible with
-Python 3.4, but not tested anymore.
+`miarec_sshfs` supports Python versions 3.6+ 
 
+## Notable differences to `fs.sshfs`
+
+1. Loading of configuration from SSH Config files (`~/.ssh/config`) is removed due to potential security issues, 
+when this component used in SaaS project. 
+ 
+2. Automatic loading of SSH keys from SSH Agent is forbidden due to potential security issues, when this components
+is used in SaaS project.
+ 
+3. A check of platform via SSH `uname -a` command is disabled because many SFTP servers forbid SSH.
+
+4. Opener is removed.
+
+5. URL is forbidden due to potential leak of SFTP credentials via url.
 
 ## Installation
 
-Install directly from PyPI, using [pip](https://pip.pypa.io/):
+Install from GitHub, using [pip](https://pip.pypa.io/):
 
 ```console
-$ pip install fs.sshfs
+$ pip install git+https://github.com/miarec/miarec_sshfs@master
 ```
-
-There is also a [`conda-forge` package](https://conda-forge.org/) available:
-
-```console
-$ conda install -c conda-forge fs.sshfs
-```
-
 
 ## Usage
 
-### Opener
-
-Use `fs.open_fs` to open a filesystem with an SSH
-[FS URL](https://docs.pyfilesystem.org/en/latest/openers.html):
+To connect to an SSH server, use the `fs.sshfs.SSHFS` constructor, which signature is:
 
 ```python
-import fs
-my_fs = fs.open_fs("ssh://[user[:password]@]host[:port]/[directory]")
-```
-
-The `sftp` scheme can be used as an alias for the `ssh` scheme in the FS
-URL. Additional argument can be passed to the `SSHFS` constructor as
-percent-encoded URL parameters (excepted `policy`). See section below
-for a list of all supported arguments.
-
-### Constructor
-
-For a more granular way of connecting to an SSH server, use the
-`fs.sshfs.SSHFS` constructor, which signature is:
-
-```python
-from fs.sshfs import SSHFS
+from miarec_sshfs import SSHFS
 my_fs = SSHFS(
   host, user=None, passwd=None, pkey=None, timeout=10, port=22,
   keepalive=10, compress=False, config_path='~/.ssh/config'
@@ -109,19 +87,36 @@ keyword arguments to control the file buffering:
   two uploaded chunks. Does nothing for files in reading mode.
 
 
-## Configuration
+## Testing
 
-`SSHFS` are aware of [SSH config
-files](http://nerderati.com/2011/03/17/simplify-your-life-with-an-ssh-config-file/)
-and as such, one of the hosts in the configuration file can be provided
-as the `host` argument for the filesystem to connect to the server with
-the proper configuration values.
+Automated unit tests are run on [GitHub Actions](https://github.com/miarec/miarec_sshfs/actions)
+
+To run the tests locally, do the following.
+
+Install Docker on local machine.
+
+Create activate python virtual environment:
+
+    python -m vevn venv
+    source venv\bin\activate
+
+Install required python packages for testing:
+
+    pip install -U -r tests/requirements.txt
+
+Install local project 
+
+    pip install -e .
+
+Run tests:
+
+    python -m unittest discover -vv
 
 
 ## Feedback
 
 Found a bug ? Have an enhancement request ? Head over to the [GitHub
-issue tracker](https://github.com/althonos/fs.sshfs/issues) of the
+issue tracker](https://github.com/miarec/miarec_sshfs/issues) of the
 project if you need to report or ask something. If you are filling in on
 a bug, please include as much information as you can about the issue,
 and try to recreate the same bug in a simple, easily reproductible
@@ -130,7 +125,9 @@ situation.
 
 ## Credits
 
-`fs.sshfs` is developed and maintained by:
+`miarec_ssfs` is developed and maintained by [MiaRec](https://www.miarec.com)
+
+Original code (`fs.sshfs`) was developed by:
 - [Martin Larralde](https://github.com/althonos)
 
 The following people contributed to `fs.sshfs`:
@@ -146,11 +143,3 @@ The following people contributed to `fs.sshfs`:
 This project obviously owes a lot to the PyFilesystem2 project and
 [all its contributors](https://github.com/PyFilesystem/pyfilesystem2/blob/master/CONTRIBUTORS.md).
 
-## See also
-
--   [fs](https://github.com/Pyfilesystem/pyfilesystem2), the core
-    PyFilesystem2 library
--   [fs.archive](https://github.com/althonos/fs.archive), enhanced
-    archive filesystems for PyFilesystem2
--   [fs.smbfs](https://github.com/althonos/fs.smbfs), PyFilesystem2 over
-    SMB using pysmb

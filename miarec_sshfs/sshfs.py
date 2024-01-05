@@ -14,14 +14,14 @@ import six
 import paramiko
 from property_cached import threaded_cached_property as cached_property
 
-from .. import errors
-from ..base import FS
-from ..info import Info
-from ..enums import ResourceType
-from ..path import basename, dirname
-from ..permissions import Permissions
-from ..osfs import OSFS
-from ..mode import Mode
+from fs import errors
+from fs.base import FS
+from fs.info import Info
+from fs.enums import ResourceType
+from fs.path import basename, dirname
+from fs.permissions import Permissions
+from fs.osfs import OSFS
+from fs.mode import Mode
 
 from .file import SSHFile
 from .error_tools import convert_sshfs_errors
