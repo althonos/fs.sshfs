@@ -324,7 +324,7 @@ class SSHFS(FS):
                     bufsize=buffering
                 )
                 handle.set_pipelined(options.get("pipelined", True))
-                if options.get("prefetch", True):
+                if options.get("prefetch", False):
                     if _mode.reading and not _mode.writing:
                         handle.prefetch(self.getsize(_path))
                 return SSHFile(handle, _mode.to_platform_bin())
