@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Test (Python ${{ matrix.python-version }}, Paramiko ${{ matrix.paramiko-version }})
     strategy:
+      fail-fast: false
       matrix:
         paramiko-version:
            - '2.0'
