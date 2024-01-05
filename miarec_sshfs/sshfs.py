@@ -37,11 +37,10 @@ class SSHFS(FS):
             user). If ``None`` is given, the SSH configuration file will be
             used if available.
         passwd (str): Password for the server, or ``None`` for passwordless
-            authentification. If given, it will be discarded immediately after
+            authentication. If given, it will be discarded immediately after
             establishing the connection.
         pkey (paramiko.PKey): A private key or a list of private key  to use.
-            If ``None`` is supplied, the SSH Agent will be used to look for
-            keys.
+            If ``None`` is supplied, then a password will be used.
         timeout (int): The timeout to use when connecting to the SSH server, in
             seconds (defaults to 10).
         port (int): Port number the SSH server is listening on (defaults to 22,
@@ -50,9 +49,10 @@ class SSHFS(FS):
             is sent (set to 0 to disable keepalive, default is 10).
         compress (bool): Set to ``True`` to compress the messages (disabled by
             default).
-        config_path (str): The path to a SSH configuration file to use while
-            establishing connection. Defaults to ``~/.ssh/config``, the path
-            to the default OpenSSH client configuration file.
+        ssh_config (paramiko.SSHConfig): The OpenSSH config object, optional.
+            For example, to load configuration from `~/.ssh/config`,
+            create it with:
+                SSHConfig.from_path("~/.ssh/config")
         exec_timeout (int): The timeout to use when executing arbitrary
             commands on the SSH server. Defaults to the value of ``timeout``.
         policy (paramiko.MissingHostKeyPolicy): The policy to use to resolve
@@ -76,21 +76,6 @@ class SSHFS(FS):
         'virtual': False,
     }
 
-    @staticmethod
-    def _get_ssh_config(config_path='~/.ssh/config'):
-        """Extract the configuration located at ``config_path``.
-
-        Returns:
-            paramiko.SSHConfig: the configuration instance.
-        """
-        ssh_config = paramiko.SSHConfig()
-        try:
-            with open(os.path.realpath(os.path.expanduser(config_path))) as f:
-                ssh_config.parse(f)
-        except IOError:
-            pass
-        return ssh_config
-
     def __init__(
             self,
             host,
@@ -101,17 +86,20 @@ class SSHFS(FS):
             port=22,
             keepalive=10,
             compress=False,
-            config_path='~/.ssh/config',
+            ssh_config=None,
             exec_timeout=None,
             policy=None,
             **kwargs
     ):  # noqa: D102
         super(SSHFS, self).__init__()
 
+        if ssh_config is None:
+            ssh_config = paramiko.SSHConfig()
+
         # Attempt to get a configuration for the given host
-        ssh_config = self._get_ssh_config(config_path)
         config = ssh_config.lookup(host)
         pkey = config.get('identityfile') or pkey
+
         # Extract the given info
         pkey, keyfile = (pkey, None) \
             if isinstance(pkey, paramiko.PKey) else (None, pkey)
@@ -125,13 +113,13 @@ class SSHFS(FS):
         _policy = paramiko.AutoAddPolicy() if policy is None else policy
 
         try:
-            # TODO: add more options
-            client.load_system_host_keys()
+            # Do not call client.load_system_host_keys() due to potential security issues
             client.set_missing_host_key_policy(_policy)
             argdict = {
                 "pkey": pkey,
                 "key_filename": keyfile,
-                "look_for_keys": True if (pkey and keyfile) is None else False,
+                "look_for_keys": False,   # do not try to load keys from SSH Agent
+                "allow_agent": False,     # do not allow SSH Agent
                 "compress": compress,
                 "timeout": timeout
             }
