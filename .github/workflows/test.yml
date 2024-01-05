@@ -1,8 +1,10 @@
 name: Test
 
 on:
-  - push
-  - pull_request
+  push:
+    branches: [ "master" ]
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -14,8 +16,6 @@ jobs:
            - '2.0'
            - '3.0'
         python-version:
-          #- 2.7
-          #- 3.5
           #- 3.6
           - '3.7'
           - '3.8'
