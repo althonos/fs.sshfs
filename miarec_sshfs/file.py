@@ -18,6 +18,11 @@ class SSHFile(RawWrapper):
         super(SSHFile, self).__init__(handler)
         self.mode = mode
 
+    def __del__(self):
+        # Close this file and release a network connection when the object is destroyed by garbage collector
+        # Otherwise, we may have a connection leakage
+        self.close()
+
     def seek(self, offset, whence=0):  # noqa: D102
         if whence > 2:
             raise ValueError("invalid whence "
