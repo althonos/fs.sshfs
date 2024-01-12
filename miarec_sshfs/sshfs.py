@@ -290,7 +290,7 @@ class SSHFS(FS):
             # preserve times if required
             if preserve_time:
                 self._utime(
-                    _path,
+                    _dst_path,
                     src_info.raw["details"]["modified"],
                     src_info.raw["details"]["accessed"],
                 )
