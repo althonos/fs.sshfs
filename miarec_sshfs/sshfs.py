@@ -105,9 +105,14 @@ class SSHFS(FS):
             config_path=None,
             exec_timeout=None,
             policy=None,
+            disable_shell=True,   # Disable running shell commands like "uname -s"
+                                  # On some SFTP servers shell is forbidden.
+                                  # A network connection is forcibly closed by server if a client tries to run any commands
             **kwargs
     ):  # noqa: D102
         super(SSHFS, self).__init__()
+
+        self.disable_shell = disable_shell
 
         if ssh_config and config_path:
             raise ValueError("Only one of 'ssh_config' or 'config_path' must be specified")
@@ -492,6 +497,11 @@ class SSHFS(FS):
         Returns:
             str: the platform of the remote server, as in `sys.platform`.
         """
+        # On some SFTP servers, a shell is forbidden.
+        # The server may forcibly close a network connection if a client attempts to run any commands
+        if self.disable_shell:
+            return "unknown"
+
         try:
             uname_sys = self._exec_command("uname -s")
             sysinfo = self._exec_command("sysinfo")
