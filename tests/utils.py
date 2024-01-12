@@ -27,7 +27,8 @@ def fs_version():
 
 def startServer(docker_client, user, pasw, port):
     sftp_container = docker_client.containers.run(
-        "sjourdan/alpine-sshd", detach=True, ports={'22/tcp': port},
+        "sjourdan/alpine-sshd", detach=True, remove=True, auto_remove=True,
+        ports={'22/tcp': port},
         environment={'USER': user, 'PASSWORD': pasw},
     )
     time.sleep(1)
@@ -36,4 +37,3 @@ def startServer(docker_client, user, pasw, port):
 
 def stopServer(server_container):
     server_container.kill()
-    server_container.remove()
