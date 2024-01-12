@@ -76,6 +76,21 @@ class SSHFS(FS):
         'virtual': False,
     }
 
+    @staticmethod
+    def _get_ssh_config(config_path):
+        """Extract the configuration located at ``config_path``.
+
+        Returns:
+            paramiko.SSHConfig: the configuration instance.
+        """
+        ssh_config = paramiko.SSHConfig()
+        try:
+            with open(os.path.realpath(os.path.expanduser(config_path))) as f:
+                ssh_config.parse(f)
+        except IOError:
+            pass
+        return ssh_config
+
     def __init__(
             self,
             host,
@@ -87,11 +102,18 @@ class SSHFS(FS):
             keepalive=10,
             compress=False,
             ssh_config=None,
+            config_path=None,
             exec_timeout=None,
             policy=None,
             **kwargs
     ):  # noqa: D102
         super(SSHFS, self).__init__()
+
+        if ssh_config and config_path:
+            raise ValueError("Only one of 'ssh_config' or 'config_path' must be specified")
+
+        if config_path:
+            ssh_config = self._get_ssh_config(config_path)
 
         if ssh_config is None:
             ssh_config = paramiko.SSHConfig()
