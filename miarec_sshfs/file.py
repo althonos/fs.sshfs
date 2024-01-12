@@ -13,7 +13,8 @@ class SSHFile(RawWrapper):
     """A file on a remote SSH server.
     """
 
-    def __init__(self, handler, mode):
+    def __init__(self, handler, mode, fs):
+        self._fs = fs
         super(SSHFile, self).__init__(handler)
         self.mode = mode
 

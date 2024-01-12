@@ -363,7 +363,7 @@ class SSHFS(FS):
                 if options.get("prefetch", False):
                     if _mode.reading and not _mode.writing:
                         handle.prefetch(self.getsize(_path))
-                return SSHFile(handle, _mode.to_platform_bin())
+                return SSHFile(handle, _mode.to_platform_bin(), fs=self)
 
     def remove(self, path):  # noqa: D102
         self.check()
