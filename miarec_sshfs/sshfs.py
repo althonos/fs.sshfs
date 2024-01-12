@@ -58,6 +58,7 @@ class SSHFS(FS):
         policy (paramiko.MissingHostKeyPolicy): The policy to use to resolve
             missing host keys. Defaults to ``None``, which will create a
             `paramiko.AutoAddPolicy` instance.
+        use_posix_rename (bool): Use POSIX RENAME command if supporte by a server
 
     Raises:
         fs.errors.CreateFailed: when the filesystem could not be created. The
@@ -108,11 +109,13 @@ class SSHFS(FS):
             disable_shell=True,   # Disable running shell commands like "uname -s"
                                   # On some SFTP servers shell is forbidden.
                                   # A network connection is forcibly closed by server if a client tries to run any commands
+            use_posix_rename=False,
             **kwargs
     ):  # noqa: D102
         super(SSHFS, self).__init__()
 
         self.disable_shell = disable_shell
+        self.use_posix_rename = use_posix_rename
 
         if ssh_config and config_path:
             raise ValueError("Only one of 'ssh_config' or 'config_path' must be specified")
@@ -290,8 +293,14 @@ class SSHFS(FS):
                     raise errors.DestinationExists(dst_path)
                 with convert_sshfs_errors('move', dst_path):
                     self._sftp.remove(_dst_path)
-            # rename the file through SFTP's 'RENAME'
-            self._sftp.rename(_src_path, _dst_path)
+
+            with convert_sshfs_errors('move', dst_path):
+                if self.use_posix_rename:
+                    self._sftp.posix_rename(_src_path, _dst_path)
+                else:
+                    # rename the file through SFTP's 'RENAME'
+                    self._sftp.rename(_src_path, _dst_path)
+
             # preserve times if required
             if preserve_time:
                 self._utime(
