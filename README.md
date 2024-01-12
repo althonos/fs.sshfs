@@ -2,7 +2,7 @@
 
 This is a fork of [fs.sshfs](https://github.com/althonos/fs.sshfs) project, with modifications that are required for our needs.
 
-[![Actions](https://img.shields.io/github/actions/workflow/status/althonos/fs.sshfs/test.yml?branch=master&logo=github&style=flat-square&maxAge=300)](https://github.com/miarec/miarec_sshfs/actions)
+[![Actions](https://img.shields.io/github/actions/workflow/status/miarec/miarec_sshfs/test.yml?branch=master&logo=github&style=flat-square&maxAge=300)](https://github.com/miarec/miarec_sshfs/actions)
 [![License](https://img.shields.io/pypi/l/fs.sshfs.svg?logo=gnu&style=flat-square&maxAge=36000)](https://choosealicense.com/licenses/lgpl-2.1/)
 
 
@@ -24,11 +24,9 @@ when this component used in SaaS project.
 2. Automatic loading of SSH keys from SSH Agent is forbidden due to potential security issues, when this components
 is used in SaaS project.
  
-3. A check of platform via SSH `uname -a` command is disabled because many SFTP servers forbid SSH.
+3. The opener protocol prefixes are `mssh://` and `msftp://` (instead of the original `ssh://` and `sftp://`)
 
-4. Opener is removed.
-
-5. URL is forbidden due to potential leak of SFTP credentials via url.
+4. URL is forbidden due to potential leak of SFTP credentials via url.
 
 ## Installation
 
