@@ -1,4 +1,0 @@
-codecov ~=2.1
-docker ~=6.0
-urllib3 ~=2.0
-semantic-version ~=2.10

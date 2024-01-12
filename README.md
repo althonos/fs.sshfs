@@ -98,17 +98,13 @@ Create activate python virtual environment:
     python -m vevn venv
     source venv\bin\activate
 
-Install required python packages for testing:
+Install the project and test dependencies:
 
-    pip install -U -r tests/requirements.txt
-
-Install local project 
-
-    pip install -e .
+    pip install -e ".[test]"
 
 Run tests:
 
-    python -m unittest discover -vv
+    pytest -v
 
 
 ## Feedback
