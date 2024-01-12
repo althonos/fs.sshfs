@@ -1,9 +1,9 @@
 # `miarec_sshfs` SFTP filesystem for PyFilesystem2
 
-This is a fork of [fs.sshfs](https://github.com/althonos/fs.sshfs) project, with modifications that are required for our needs.
-
 [![Actions](https://img.shields.io/github/actions/workflow/status/miarec/miarec_sshfs/test.yml?branch=master&logo=github&style=flat-square&maxAge=300)](https://github.com/miarec/miarec_sshfs/actions)
 [![License](https://img.shields.io/pypi/l/fs.sshfs.svg?logo=gnu&style=flat-square&maxAge=36000)](https://choosealicense.com/licenses/lgpl-2.1/)
+
+This is a fork of [fs.sshfs](https://github.com/althonos/fs.sshfs) project, with modifications that are required for our needs.
 
 
 ## Requirements
