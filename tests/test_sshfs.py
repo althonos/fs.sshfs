@@ -132,11 +132,12 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
             self.fs.setinfo("test.txt", {'access': {'uid': 1001, 'gid':1002}})
             chown.assert_called_with(remote_path, 1001, 1002)
 
-    def test_exec_command_exception(self):
+    def test_exec_command_exception_shell_disabled(self):
         ssh = self.fs.delegate_fs()
         # make sure to invalidate the cache
         ssh.platform
         del ssh.platform
+        ssh.disable_shell = True
         # pretend we get an error while the platform is guessed
         with utils.mock.patch.object(
             ssh,
@@ -144,8 +145,22 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
             side_effect=paramiko.ssh_exception.SSHException()
         ) as _exec_command:
             self.assertEqual(ssh.platform, "unknown")
-            if sys.version_info[:2] != (3,5):
-                _exec_command.assert_called()
+            _exec_command.assert_not_called()
+
+    def test_exec_command_exception(self):
+        ssh = self.fs.delegate_fs()
+        # make sure to invalidate the cache
+        ssh.platform
+        del ssh.platform
+        ssh.disable_shell = False
+        # pretend we get an error while the platform is guessed
+        with utils.mock.patch.object(
+            ssh,
+            '_exec_command',
+            side_effect=paramiko.ssh_exception.SSHException()
+        ) as _exec_command:
+            self.assertEqual(ssh.platform, "unknown")
+            _exec_command.assert_called()
 
     def test_utime(self):
 
