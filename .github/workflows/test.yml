@@ -84,7 +84,7 @@ jobs:
     - name: Build a wheel and source tarball
       run: python -m build --sdist --wheel --outdir dist
     - name: Publish distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@v1
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
