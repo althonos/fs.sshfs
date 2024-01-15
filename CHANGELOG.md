@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [v2024.1.3]
+## [v2024.1.3] - 2024-01-15
+
 
 [v2024.1.3]: https://github.com/miarec/miarec_sshfs/compare/v20241.2...v2024.1.3
 
@@ -13,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Bump up version to resolve GitHub Actions workflow issues
 
-## [v2024.1.2]
+## [v2024.1.2] - 2024-01-13
 
 [v2024.1.2]: https://github.com/miarec/miarec_sshfs/compare/v20241.0...v2024.1.2
 
