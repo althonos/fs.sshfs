@@ -219,3 +219,86 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
         now = int(time.time())
         with utils.mock.patch("time.time", lambda: now):
             super(TestSSHFS, self).test_setinfo()
+
+
+@unittest.skipIf(utils.docker_client is None, "docker service unreachable.")
+class TestConnectionRecovery(unittest.TestCase):
+
+    user = "user"
+    pasw = "pass"
+    port = 2223
+
+
+    def test_server_crash(self):
+
+        # ------------------------------------------
+        # Start SFTP server in docker container
+        # ------------------------------------------
+        sftp_container = None
+        ssh_fs = None
+
+        try:
+            self.port = utils.find_available_port(begin_port=self.port)
+            sftp_container = utils.startServer(utils.docker_client, self.user, self.pasw, self.port)
+
+            # ------------------------------------------
+            # Create some test files
+            # ------------------------------------------
+            ssh_fs = SSHFS('localhost', self.user, self.pasw, port=self.port)
+
+            test_folder = '/home/{}/{}'.format(self.user, uuid.uuid4().hex)
+            ssh_fs.makedir(test_folder)
+
+            with ssh_fs.openbin(f'{test_folder}/foo.txt', 'wb') as f:
+                f.write(b'this is a test')
+
+            with ssh_fs.openbin(f'{test_folder}/bar.txt', 'wb') as f:
+                f.write(b'this is the second test')
+
+            self.assertEqual(ssh_fs.listdir(test_folder), ['foo.txt', 'bar.txt'])
+
+            with ssh_fs.openbin(f'{test_folder}/foo.txt', 'rb') as f:
+                data = f.read()
+                self.assertEqual(data, b'this is a test')
+
+            # ------------------------------------------
+            # Stop container
+            # ------------------------------------------
+            utils.stopServer(sftp_container)
+            sftp_container = None
+
+            # ------------------------------------------
+            # EXPECTED: RemoteConnectionError exception when trying to use such File System
+            # ------------------------------------------
+            with self.assertRaises(fs.errors.RemoteConnectionError):
+                self.assertEqual(ssh_fs.listdir(test_folder), ['foo.txt', 'bar.txt'])
+
+            with self.assertRaises(fs.errors.RemoteConnectionError):
+                with ssh_fs.openbin(f'{test_folder}/foo.txt', 'rb') as f:
+                    data = f.read()
+                    self.assertEqual(data, b'this is a test')
+
+            # ------------------------------------------
+            # Re-start SFTP server container on the same port
+            # ------------------------------------------
+            sftp_container = utils.startServer(utils.docker_client, self.user, self.pasw, self.port)
+
+            # ------------------------------------------
+            # EXPECTED: a connection to SFTP server is re-established automatically
+            # ------------------------------------------
+
+            # Below tests do not pass yet!
+            # self.assertEqual(ssh_fs.listdir(test_folder), ['foo.txt', 'bar.txt'])
+
+            # with ssh_fs.openbin(f'{test_folder}/foo.txt', 'rb') as f:
+            #     data = f.read()
+            #     self.assertEqual(data, b'this is a test')
+
+
+        finally:
+            if ssh_fs:
+                ssh_fs.close()
+
+            if sftp_container:
+                utils.stopServer(sftp_container)
+

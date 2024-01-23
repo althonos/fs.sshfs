@@ -189,7 +189,7 @@ class SSHFS(FS):
         namespaces = namespaces or ()
         _path = self.validatepath(path)
 
-        with convert_sshfs_errors('getinfo', path):
+        with convert_sshfs_errors(self, op='getinfo', path=path):
             _stat = self._sftp.stat(_path)
             info = self._make_raw_info(basename(_path), _stat, namespaces)
 
@@ -228,7 +228,7 @@ class SSHFS(FS):
         if _type is not ResourceType.directory:
             raise errors.DirectoryExpected(path)
 
-        with convert_sshfs_errors('listdir', path):
+        with convert_sshfs_errors(self, op='listdir', path=path):
             return self._sftp.listdir(_path)
 
     def scandir(self, path, namespaces=None, page=None):  # noqa: D102
@@ -237,7 +237,7 @@ class SSHFS(FS):
         _namespaces = namespaces or ()
         start, stop = page or (None, None)
         try:
-            with convert_sshfs_errors('scandir', path, directory=True):
+            with convert_sshfs_errors(self, op='scandir', path=path, directory=True):
                 # We can't use listdir_iter here because it doesn't support
                 # concurrent iteration over multiple directories, which can
                 # happen during a search="depth" walk.
@@ -262,7 +262,7 @@ class SSHFS(FS):
             info = self.getinfo(_path)
         except errors.ResourceNotFound:
             with self._lock:
-                with convert_sshfs_errors('makedir', path):
+                with convert_sshfs_errors(self, op='makedir', path=path):
                     self._sftp.mkdir(_path, _permissions.mode)
         else:
             if (info.is_dir and not recreate) or info.is_file:
@@ -291,10 +291,10 @@ class SSHFS(FS):
             if self.isfile(_dst_path):
                 if not overwrite:
                     raise errors.DestinationExists(dst_path)
-                with convert_sshfs_errors('move', dst_path):
+                with convert_sshfs_errors(self, op='move', path=dst_path):
                     self._sftp.remove(_dst_path)
 
-            with convert_sshfs_errors('move', dst_path):
+            with convert_sshfs_errors(self, op='move', path=dst_path):
                 if self.use_posix_rename:
                     self._sftp.posix_rename(_src_path, _dst_path)
                 else:
@@ -352,7 +352,7 @@ class SSHFS(FS):
                 raise errors.ResourceNotFound(path)
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
-            with convert_sshfs_errors('openbin', path):
+            with convert_sshfs_errors(self, op='openbin', path=path):
                 _sftp = self._client.open_sftp()
                 handle = _sftp.open(
                     _path,
@@ -374,7 +374,7 @@ class SSHFS(FS):
         if self.getinfo(_path).is_dir:
             raise errors.FileExpected(path)
 
-        with convert_sshfs_errors('remove', path):
+        with convert_sshfs_errors(self, op='remove', path=path):
             with self._lock:
                 self._sftp.remove(_path)
 
@@ -388,7 +388,7 @@ class SSHFS(FS):
         if not self.isempty(_path):
             raise errors.DirectoryNotEmpty(path)
 
-        with convert_sshfs_errors('removedir', path):
+        with convert_sshfs_errors(self, op='removedir', path=path):
             with self._lock:
                 self._sftp.rmdir(_path)
 
@@ -402,7 +402,7 @@ class SSHFS(FS):
         access = info.get('access', {})
         details = info.get('details', {})
 
-        with convert_sshfs_errors('setinfo', path):
+        with convert_sshfs_errors(self, op='setinfo', path=path):
             if 'accessed' in details or 'modified' in details:
                 self._utime(_path,
                             details.get("modified"),
@@ -447,7 +447,7 @@ class SSHFS(FS):
                 raise errors.ResourceNotFound(path)
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
-            with convert_sshfs_errors('download', path):
+            with convert_sshfs_errors(self, op='download', path=path):
                 self._sftp.getfo(_path, file, callback=callback)
 
     def upload(self, path, file, chunk_size=None, callback=None, file_size=None, confirm=True, **options):
@@ -490,7 +490,7 @@ class SSHFS(FS):
                 raise errors.ResourceNotFound(path)
             elif self.isdir(_path):
                 raise errors.FileExpected(path)
-            with convert_sshfs_errors('upload', path):
+            with convert_sshfs_errors(self, op='upload', path=path):
                 self._sftp.putfo(
                     file,
                     _path,
