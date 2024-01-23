@@ -31,6 +31,7 @@ class TestSSHFS(fs.test.FSTestCases, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestSSHFS, cls).setUpClass()
+        cls.port = utils.find_available_port(begin_port=cls.port)
         cls.sftp_container = utils.startServer(
             utils.docker_client, cls.user, cls.pasw, cls.port)
 

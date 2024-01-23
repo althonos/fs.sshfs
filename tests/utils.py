@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import time
 import warnings
+import socket, errno
 
 import fs
 import semantic_version
@@ -37,3 +38,24 @@ def startServer(docker_client, user, pasw, port):
 
 def stopServer(server_container):
     server_container.kill()
+
+
+def is_port_in_use(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(1)
+        return s.connect_ex(('localhost', port)) == 0
+
+
+def find_available_port(begin_port = 2222, end_port=3222):
+    """
+    Find available port to use for SFTP server.
+
+    This function tries to bind to port in range and return the one 
+    that is not in use.
+    """
+
+    for port in range(begin_port, end_port):
+        if not is_port_in_use(port):
+            return port
+
+    raise RuntimeError("Could not find available port in range {begin_port}..{end_port}")

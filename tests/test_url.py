@@ -15,20 +15,25 @@ class TestFSURL(unittest.TestCase):
 
     user = "user"
     pasw = "pass"
-    port = 2224
+    port = 3222
+
+    @classmethod
+    def setUpClass(cls):
+        # Find a port, which is for sure doesn't have SFTP server listening to
+        cls.port = utils.find_available_port(begin_port=cls.port, end_port=cls.port+1000)
 
     def test_timeout(self):
         with utils.mock.patch('miarec_sshfs.SSHFS', utils.mock.MagicMock()) as magic:
-            fs.open_fs('mssh://user:pass@localhost:2224/?timeout=1')
+            fs.open_fs(f'mssh://user:pass@localhost:{self.port}/?timeout=1')
             self.assertEqual(magic.call_args[-1]['timeout'], 1)
-            fs.open_fs('mssh://user:pass@localhost:2224/?compress=1&timeout=5')
+            fs.open_fs(f'mssh://user:pass@localhost:{self.port}/?compress=1&timeout=5')
             self.assertEqual(magic.call_args[-1]['timeout'], 5)
 
     def test_compress(self):
         with utils.mock.patch('miarec_sshfs.SSHFS', utils.mock.MagicMock()) as magic:
-            fs.open_fs('mssh://user:pass@localhost:2224/?compress=true')
+            fs.open_fs(f'mssh://user:pass@localhost:{self.port}/?compress=true')
             self.assertEqual(magic.call_args[-1]['compress'], True)
-            fs.open_fs('mssh://user:pass@localhost:2224/?timeout=5&compress=1')
+            fs.open_fs(f'mssh://user:pass@localhost:{self.port}/?timeout=5&compress=1')
             self.assertEqual(magic.call_args[-1]['compress'], True)
-            fs.open_fs('mssh://user:pass@localhost:2224/?timeout=5&compress=0')
+            fs.open_fs(f'mssh://user:pass@localhost:{self.port}/?timeout=5&compress=0')
             self.assertEqual(magic.call_args[-1]['compress'], False)

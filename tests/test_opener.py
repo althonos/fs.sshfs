@@ -36,6 +36,7 @@ class TestOpener(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.port = utils.find_available_port(begin_port=cls.port)
         cls.sftp_container = utils.startServer(
             utils.docker_client, cls.user, cls.pasw, cls.port)
 
